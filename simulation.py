@@ -24,7 +24,21 @@ class Simulation:
         return jnp.clip(agents_pos, 0, grid_size - 1)
 
     def visualize(self, grid, agents_pos):
-        pass
+        if not plt.fignum_exists(1):
+            plt.ion()
+            plt.figure(figsize=(10, 10))
+
+        plt.clf()
+
+        plt.imshow(grid, cmap='viridis', origin='upper')
+        plt.scatter(agents_pos[:, 0], agents_pos[:, 1], color='red', marker='o', label='Agents')
+        plt.title('Multi-Agent Simulation')
+        plt.xlabel('X-axis')
+        plt.ylabel('Y-axis')
+        plt.legend()
+        
+        plt.draw()
+        plt.pause(0.1)
 
     def simulate(self, grid, agents_pos, agents_states, num_steps, grid_size, key):
         # use a fori_loop after 
