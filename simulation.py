@@ -44,15 +44,16 @@ class Simulation:
         plt.draw()
         plt.pause(0.1)
 
-    def simulate(self, grid, agents_pos, agents_states, num_steps, grid_size, key):
+    def simulate(self, grid, agents_pos, agents_states, num_steps, grid_size, key, visualize=True):
         # use a fori_loop after
         for step in range(num_steps):
             key, a_key = random.split(key)
             agents_pos = self.move_agents(agents_pos, grid_size, a_key)
 
             agents_states += 0.1
-
-            self.visualize(grid, agents_pos)
+            
+            if visualize:
+                self.visualize(grid, agents_pos)
 
         return grid, agents_pos, agents_states
 

@@ -1,14 +1,31 @@
-# test_assert_examples.py
+import jax
 
-def test_uppercase():
-    assert "loud noises".upper() == "LOUD NOISES"
+from simulation import Simulation
 
-def test_reversed():
-    assert list(reversed([1, 2, 3, 4])) == [4, 3, 2, 1]
 
-def test_some_primes():
-    assert 37 in {
-        num
-        for num in range(2, 50)
-        if not any(num % div == 0 for div in range(2, num))
-    }
+def test_simulation_init():
+    num_agents = 5
+    grid_size = 20
+    key = jax.random.PRNGKey(0)
+
+    sim = Simulation(num_agents=num_agents, grid_size=grid_size, key=key)
+
+    assert sim.agents_pos.shape == (num_agents, 2)
+    assert sim.grid.shape == (grid_size, grid_size)
+
+
+def test_simulation_run():
+    num_agents = 5
+    grid_size = 20
+    key = jax.random.PRNGKey(0)
+    num_steps = 100
+
+    sim = Simulation(num_agents=num_agents, grid_size=grid_size, key=key)
+
+    grid, agents_pos, agents_states, key = sim.get_env_state()
+    grid, final_agent_positions, final_agent_states = sim.simulate(
+        grid, agents_pos, agents_states, num_steps, grid_size, key, visualize=False
+    )
+
+    assert final_agent_positions.shape == (num_agents, 2)
+    assert final_agent_states.shape == (num_agents,)
