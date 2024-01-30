@@ -13,17 +13,40 @@ def main(cfg: DictConfig):
     max_agents = cfg.params.max_agents
     grid_size = cfg.params.grid_size
     num_steps = cfg.params.num_steps
+    visualize = cfg.params.visualize
+    viz_delay = cfg.params.viz_delay
     rng_key = random.PRNGKey(cfg.params.random_seed)
 
-    sim = Simulation(num_agents, max_agents,grid_size, rng_key)
+    sim = Simulation(num_agents, max_agents, grid_size, rng_key)
 
+    # Launch a simulation
     print("\nSimulation started")
-    grid, agents_pos, agents_states, key = sim.get_env_state()
-    grid, final_agent_positions, final_agent_states = sim.simulate(
-        grid, agents_pos, agents_states, num_steps, grid_size, key
-    )
-    print("\nSimulation ended")
 
+    grid, agents_pos, agents_states, key = sim.get_env_state()
+
+    for step in range(num_steps):
+        if step % 10 == 0:
+            print(f"step {step}")
+        
+        if step == 20:
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+
+        key, a_key = random.split(key)
+
+        agents_pos = sim.move_agents(agents_pos, grid_size, a_key)
+        agents_states += 0.1
+
+        if visualize:
+            sim.visualize(grid, agents_pos, viz_delay)
+
+    print("\nSimulation ended")
 
 if __name__ == "__main__":
     main()

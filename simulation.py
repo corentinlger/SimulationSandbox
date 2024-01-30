@@ -43,6 +43,7 @@ class Simulation:
             agents_pos = agents_pos.at[self.num_agents].set(*random.randint(self.key, (1, 2), 0, self.grid_size))
             agents_states = agents_states.at[self.num_agents].set(1)
             self.num_agents += 1
+            print(f"Added agent {self.num_agents}")
             
         else:
             print("Impossible to add more agents")
@@ -54,7 +55,7 @@ class Simulation:
     def remove_agent(idx=None):
         pass
 
-    def visualize(self, grid, agents_pos):
+    def visualize(self, grid, agents_pos, delay=0.1):
         if not plt.fignum_exists(1):
             plt.ion()
             plt.figure(figsize=(10, 10))
@@ -71,39 +72,8 @@ class Simulation:
         plt.legend()
 
         plt.draw()
-        plt.pause(0.1)
+        plt.pause(delay)
 
-    # TODO : move in the main class and have a thing like init, step functions like in gym
-    def simulate(
-        self, grid, agents_pos, agents_states, num_steps, grid_size, key, visualize=True
-    ):
-        
-        # use a fori_loop after
-        for step in range(num_steps):
-            
-            if step % 10 == 0:
-                print(f"step {step}")
-            if step == 20:
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
-                print(self.num_agents)
-
-            key, a_key = random.split(key)
-
-            agents_pos = self.move_agents(agents_pos, grid_size, a_key)
-
-            agents_states += 0.1
-
-            if visualize:
-                self.visualize(grid, agents_pos)
-
-        return grid, agents_pos, agents_states
 
     def get_env_state(self):
         return self.grid, self.agents_pos, self.agents_states, self.key
