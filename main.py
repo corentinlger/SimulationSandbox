@@ -10,11 +10,12 @@ def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
 
     num_agents = cfg.params.num_agents
+    max_agents = cfg.params.max_agents
     grid_size = cfg.params.grid_size
     num_steps = cfg.params.num_steps
     rng_key = random.PRNGKey(cfg.params.random_seed)
 
-    sim = Simulation(num_agents, grid_size, rng_key)
+    sim = Simulation(num_agents, max_agents,grid_size, rng_key)
 
     print("\nSimulation started")
     grid, agents_pos, agents_states, key = sim.get_env_state()

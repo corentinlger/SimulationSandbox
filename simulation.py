@@ -3,27 +3,56 @@ from jax import random
 
 import matplotlib.pyplot as plt
 
+# TODO : CHANGE ALL THE FILE SO WE EITHER USE SELF.AGENT8POS OR JUST USE IT IN THE SIMULATION BUTT NOT BOTH
 
 # Will change this later : take the habit of using less classes and more pure functions without self argument
 class Simulation:
-    def __init__(self, num_agents, grid_size, key):
+    def __init__(self, num_agents, max_agents, grid_size, key):
         self.grid = self.init_grid(grid_size)
-        self.agents_pos, self.agents_states = self.init_agents(
-            num_agents, grid_size, key
+        self.grid_size = grid_size
+        self.max_agents = max_agents
+        self.agents_pos, self.agents_states, self.num_agents = self.init_agents(
+            num_agents, max_agents, grid_size, key
         )
         self.key = key
 
     def init_grid(self, grid_size):
         return jnp.zeros((grid_size, grid_size), dtype=jnp.float32)
 
-    def init_agents(self, num_agents, grid_size, key):
-        agents_pos = random.randint(key, (num_agents, 2), 0, grid_size)
-        agent_states = jnp.ones((num_agents,), dtype=jnp.float32)
-        return agents_pos, agent_states
+    def init_agents(self, num_agents, max_agents, grid_size, key):
+        if num_agents > max_agents:
+            raise(ValueError("num_agents cannot exceed max_agents"))
+        
+        # set all pos and states to default values in arrays of size max_agents 
+        agents_pos = jnp.zeros((max_agents, 2), dtype=jnp.int32)
+        agents_states = jnp.zeros((max_agents,), dtype=jnp.float32)
+        
+        # only update the ones of agents that actually exist
+        agents_pos = agents_pos.at[:num_agents].set(random.randint(key, (num_agents, 2), 0, grid_size))
+        agents_states = agents_states.at[:num_agents].set(jnp.ones((num_agents,), dtype=jnp.float32))
+        
+        return agents_pos, agents_states, num_agents
 
+    # TODO : Only move existing agents
     def move_agents(self, agents_pos, grid_size, key):
         agents_pos += random.randint(key, agents_pos.shape, -1, 2)
         return jnp.clip(agents_pos, 0, grid_size - 1)
+    
+    def add_agent(self, agents_pos, agents_states):
+        if self.num_agents < self.max_agents:
+            agents_pos = agents_pos.at[self.num_agents].set(*random.randint(self.key, (1, 2), 0, self.grid_size))
+            agents_states = agents_states.at[self.num_agents].set(1)
+            self.num_agents += 1
+            
+        else:
+            print("Impossible to add more agents")
+
+        return agents_pos, agents_states
+
+
+    # TODO:
+    def remove_agent(idx=None):
+        pass
 
     def visualize(self, grid, agents_pos):
         if not plt.fignum_exists(1):
@@ -34,7 +63,7 @@ class Simulation:
 
         plt.imshow(grid, cmap="viridis", origin="upper")
         plt.scatter(
-            agents_pos[:, 0], agents_pos[:, 1], color="red", marker="o", label="Agents"
+            agents_pos[:self.num_agents, 0], agents_pos[:self.num_agents, 1], color="red", marker="o", label="Agents"
         )
         plt.title("Multi-Agent Simulation")
         plt.xlabel("X-axis")
@@ -44,14 +73,33 @@ class Simulation:
         plt.draw()
         plt.pause(0.1)
 
-    def simulate(self, grid, agents_pos, agents_states, num_steps, grid_size, key, visualize=True):
+    # TODO : move in the main class and have a thing like init, step functions like in gym
+    def simulate(
+        self, grid, agents_pos, agents_states, num_steps, grid_size, key, visualize=True
+    ):
+        
         # use a fori_loop after
         for step in range(num_steps):
+            
+            if step % 10 == 0:
+                print(f"step {step}")
+            if step == 20:
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                agents_pos, agents_states = self.add_agent(agents_pos, agents_states)
+                print(self.num_agents)
+
             key, a_key = random.split(key)
+
             agents_pos = self.move_agents(agents_pos, grid_size, a_key)
 
             agents_states += 0.1
-            
+
             if visualize:
                 self.visualize(grid, agents_pos)
 

@@ -3,3 +3,4 @@ outputs
 myvenv
 __pycache__/
 random/
+test.ipynb
