@@ -15,6 +15,7 @@ def main(cfg: DictConfig):
     num_steps = cfg.params.num_steps
     visualize = cfg.params.visualize
     viz_delay = cfg.params.viz_delay
+
     rng_key = random.PRNGKey(cfg.params.random_seed)
 
     sim = Simulation(num_agents, max_agents, grid_size, rng_key)
@@ -29,14 +30,20 @@ def main(cfg: DictConfig):
             print(f"step {step}")
         
         if step == 20:
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+
+        if step == 40:
+             sim.remove_agent()
+             sim.remove_agent()
+             sim.remove_agent()
+             sim.remove_agent()
 
         key, a_key = random.split(key)
 

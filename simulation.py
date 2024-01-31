@@ -35,6 +35,7 @@ class Simulation:
 
     # TODO : Only move existing agents
     def move_agents(self, agents_pos, grid_size, key):
+        # Shouldn't be able to do this when jit because of the += 
         agents_pos += random.randint(key, agents_pos.shape, -1, 2)
         return jnp.clip(agents_pos, 0, grid_size - 1)
     
@@ -50,10 +51,13 @@ class Simulation:
 
         return agents_pos, agents_states
 
-
-    # TODO:
-    def remove_agent(idx=None):
-        pass
+    def remove_agent(self):
+        if self.num_agents <= 0:
+            print("There is no agents to remove")
+        else:
+            self.num_agents -= 1
+            print(f"Removed agent {self.num_agents + 1}")
+        
 
     def visualize(self, grid, agents_pos, delay=0.1):
         if not plt.fignum_exists(1):

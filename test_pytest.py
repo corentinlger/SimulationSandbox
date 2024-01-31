@@ -37,14 +37,22 @@ def test_simulation_run():
             print(f"step {step}")
         
         if step == 20:
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-                agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            # Add more agents than permitted and expect to reach max_agents = 10 
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+
+        if step == 40:
+             # Remove 4 agents and expect to have 6 left 
+             sim.remove_agent()
+             sim.remove_agent()
+             sim.remove_agent()
+             sim.remove_agent()
 
         key, a_key = random.split(key)
 
@@ -54,5 +62,25 @@ def test_simulation_run():
         if VIZUALIZE:
             sim.visualize(grid, agents_pos, VIZ_DELAY)
 
-    assert sim.num_agents == MAX_AGENTS
+    assert sim.num_agents == 6
     assert agents_pos.shape == (MAX_AGENTS, 2)
+
+
+def test_add_remove_agents():
+    key = jax.random.PRNGKey(SEED)
+
+    sim = Simulation(num_agents=NUM_AGENTS, max_agents=MAX_AGENTS, grid_size=GRID_SIZE, key=key)
+    grid, agents_pos, agents_states, key = sim.get_env_state()
+
+    assert sim.num_agents == 5
+
+    for i in range(15):
+        agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
+
+    assert sim.num_agents == MAX_AGENTS
+
+    for i in range(15):
+        sim.remove_agent()
+    
+    assert sim.num_agents == 0
+
