@@ -16,42 +16,34 @@ def main(cfg: DictConfig):
     visualize = cfg.params.visualize
     viz_delay = cfg.params.viz_delay
 
-    rng_key = random.PRNGKey(cfg.params.random_seed)
+    key = random.PRNGKey(cfg.params.random_seed)
 
-    sim = Simulation(num_agents, max_agents, grid_size, rng_key)
+    sim = Simulation(max_agents, grid_size)
+    grid = sim.init_grid(grid_size)
+    agents_pos, agents_states, num_agents = sim.init_agents(num_agents, max_agents, key)
 
     # Launch a simulation
     print("\nSimulation started")
 
-    grid, agents_pos, agents_states, key = sim.get_env_state()
-
     for step in range(num_steps):
+        key, a_key, add_key = random.split(key, 3)
+
         if step % 10 == 0:
             print(f"step {step}")
         
         if step == 20:
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-            agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-
+            for _ in range(8):
+                agents_pos, agents_states, num_agents = sim.add_agent(agents_pos, agents_states, num_agents, add_key)
+            
         if step == 40:
-             sim.remove_agent()
-             sim.remove_agent()
-             sim.remove_agent()
-             sim.remove_agent()
-
-        key, a_key = random.split(key)
+            for _ in range(4):
+                num_agents = sim.remove_agent(num_agents)
 
         agents_pos = sim.move_agents(agents_pos, grid_size, a_key)
         agents_states += 0.1
 
         if visualize:
-            sim.visualize(grid, agents_pos, viz_delay)
+            sim.visualize(grid, agents_pos, num_agents, viz_delay)
 
     print("\nSimulation ended")
 
