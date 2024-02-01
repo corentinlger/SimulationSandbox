@@ -1,8 +1,8 @@
 import jax
 from jax import random
 
-from simulation import Simulation
-from agents import Agents
+from MultiAgentsSim.simulation import Simulation
+from MultiAgentsSim.agents import Agents
 
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
@@ -28,8 +28,6 @@ def test_simulation_init():
 
 def test_simulation_run():
     key = jax.random.PRNGKey(SEED)
-
-    
 
     sim = Simulation(MAX_AGENTS, GRID_SIZE)
     agents = Agents(MAX_AGENTS, GRID_SIZE)
