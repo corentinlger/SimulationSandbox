@@ -55,8 +55,8 @@ class Simulation:
             print(f"Removed agent {num_agents + 1}")
         return num_agents
         
-
-    def visualize(self, grid, agents_pos, num_agents, delay=0.1):
+    @staticmethod
+    def visualize_sim(grid, agents_pos, num_agents, delay=0.1):
         if not plt.fignum_exists(1):
             plt.ion()
             plt.figure(figsize=(10, 10))

@@ -54,7 +54,7 @@ def test_simulation_run():
         agents_states += 0.1
 
         if VIZUALIZE:
-            sim.visualize(grid, agents_pos, num_agents, VIZ_DELAY)
+            Simulation.visualize_sim(grid, agents_pos, num_agents, VIZ_DELAY)
 
     assert num_agents == 6
     assert agents_pos.shape == (MAX_AGENTS, 2)
