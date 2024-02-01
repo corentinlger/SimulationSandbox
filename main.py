@@ -3,6 +3,7 @@ from omegaconf import DictConfig, OmegaConf
 from jax import random
 
 from simulation import Simulation
+from agents import Agents
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -19,8 +20,10 @@ def main(cfg: DictConfig):
     key = random.PRNGKey(cfg.params.random_seed)
 
     sim = Simulation(max_agents, grid_size)
+    agents = Agents(max_agents, grid_size)
+
     grid = sim.init_grid(grid_size)
-    agents_pos, agents_states, num_agents = sim.init_agents(num_agents, max_agents, key)
+    agents_pos, agents_states, num_agents = agents.init_agents(num_agents, max_agents, key)
 
     # Launch a simulation
     print("\nSimulation started")
@@ -39,7 +42,8 @@ def main(cfg: DictConfig):
             for _ in range(4):
                 num_agents = sim.remove_agent(num_agents)
 
-        agents_pos = sim.move_agents(agents_pos, grid_size, a_key)
+        actions = agents.choose_action(agents_pos, a_key)
+        agents_pos = sim.move_agents(agents_pos, actions)
         agents_states += 0.1
 
         if visualize:

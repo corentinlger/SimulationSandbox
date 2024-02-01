@@ -2,6 +2,7 @@ import jax
 from jax import random
 
 from simulation import Simulation
+from agents import Agents
 
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
@@ -27,13 +28,16 @@ def test_simulation_init():
 
 def test_simulation_run():
     key = jax.random.PRNGKey(SEED)
-    num_steps = 100
 
-    sim = Simulation(max_agents=MAX_AGENTS, grid_size=GRID_SIZE)
+    
+
+    sim = Simulation(MAX_AGENTS, GRID_SIZE)
+    agents = Agents(MAX_AGENTS, GRID_SIZE)
+
     grid = sim.init_grid(GRID_SIZE)
-    agents_pos, agents_states, num_agents = sim.init_agents(NUM_AGENTS, MAX_AGENTS, key)
+    agents_pos, agents_states, num_agents = agents.init_agents(NUM_AGENTS, MAX_AGENTS, key)
 
-    for step in range(num_steps):
+    for step in range(NUM_STEPS):
         key, a_key, add_key = random.split(key, 3)
 
         if step % 10 == 0:
@@ -47,7 +51,8 @@ def test_simulation_run():
             for _ in range(4):
                 num_agents = sim.remove_agent(num_agents)
 
-        agents_pos = sim.move_agents(agents_pos, GRID_SIZE, a_key)
+        actions = agents.choose_action(agents_pos, a_key)
+        agents_pos = sim.move_agents(agents_pos, actions)
         agents_states += 0.1
 
         if VIZUALIZE:

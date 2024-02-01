@@ -1,5 +1,7 @@
+from functools import partial
+
 import jax.numpy as jnp
-from jax import random
+from jax import random, jit
 import matplotlib.pyplot as plt
 
 
@@ -25,14 +27,13 @@ class Simulation:
         
         return agents_pos, agents_states, num_agents
     
-    def choose_random_action(self, key_a):
-        return random.randint(key_a, (1, 2))
+    def choose_random_action(self, agents_pos, key_a):
+        return random.randint(key_a, agents_pos.shape, -1, 2)
     
-    # TODO : Only move existing agents
-    def move_agents(self, agents_pos, grid_size, key):
-        # Shouldn't be able to do this when jit because of the += 
-        agents_pos += random.randint(key, agents_pos.shape, -1, 2)
-        return jnp.clip(agents_pos, 0, grid_size - 1)
+    @partial(jit, static_argnums=(0, ))
+    def move_agents(self, agents_pos, agents_movements):
+        agents_pos += agents_movements
+        return jnp.clip(agents_pos, 0, self.grid_size - 1)
     
     def add_agent(self, agents_pos, agents_states, num_agents, key):
         if num_agents < self.max_agents:
