@@ -4,3 +4,4 @@ myvenv
 __pycache__/
 random/
 test.ipynb
+activate_venv.sh
