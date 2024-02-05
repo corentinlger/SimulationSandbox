@@ -19,30 +19,42 @@ print(f"Server started and listening ...")
 def generate_random_array():
     return np.random.randint(0, 10, size=(5, 5))
 
-def broadcast(data):
-    pickled_data = pickle.dumps(data)
-    for client in clients:
-        client.send(pickled_data)
-    print(f"sent {data} to server")
+def update_latest_data():
+    global latest_data
+    while True:
+        with data_lock:
+            latest_data = generate_random_array()
+            new_data_event.set()
+        time.sleep(1)
 
 def handle_client(client):
     while True:
         try:
-            data = generate_random_array()
-            broadcast(data)
-            time.sleep(1)
+            new_data_event.wait()
+            with data_lock:
+                data = latest_data
+            client.send(pickle.dumps(data))
+            new_data_event.clear()
+
         except socket.error as e:
             print(f"error: {e}")
             client.close()
             print(f"Client {client} disconnected")
             break
 
-clients = []
+# Create a global variable to store the current data + lock and event to access it
+latest_data = generate_random_array()
+data_lock = threading.Lock()
+new_data_event = threading.Event()
 
+# Create a thread to continuously update the data
+update_data_thread = threading.Thread(target=update_latest_data)
+update_data_thread.start()
+
+# Start listening to clients and launch their threads 
 while True:
     try:
         client, addr = server.accept()
-        clients.append(client)
         print(f"Connected with {addr}")
 
         client_thread = threading.Thread(target=handle_client, args=(client, ))
