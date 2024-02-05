@@ -3,7 +3,6 @@ from omegaconf import DictConfig, OmegaConf
 from jax import random
 
 from MultiAgentsSim.simulation import Simulation
-from MultiAgentsSim.simulation import visualize_sim
 from MultiAgentsSim.agents import Agents
 
 
@@ -48,7 +47,7 @@ def main(cfg: DictConfig):
         agents_states += 0.1
 
         if visualize:
-            visualize_sim(grid, agents_pos, num_agents, viz_delay)
+            Simulation.visualize_sim(grid, agents_pos, num_agents, viz_delay)
 
     print("\nSimulation ended")
 
