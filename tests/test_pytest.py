@@ -1,3 +1,5 @@
+import time 
+
 import jax
 from jax import random
 
@@ -9,7 +11,7 @@ MAX_AGENTS = 10
 GRID_SIZE = 20 
 NUM_STEPS = 50
 VIZUALIZE = True
-VIZ_DELAY = 0.000001
+STEP_DELAY = 0.000001
 SEED = 0
 
 
@@ -36,6 +38,7 @@ def test_simulation_run():
     agents_pos, agents_states, num_agents = agents.init_agents(NUM_AGENTS, MAX_AGENTS, key)
 
     for step in range(NUM_STEPS):
+        time.sleep(STEP_DELAY)
         key, a_key, add_key = random.split(key, 3)
 
         if step % 10 == 0:
@@ -54,7 +57,7 @@ def test_simulation_run():
         agents_states += 0.1
 
         if VIZUALIZE:
-            Simulation.visualize_sim(grid, agents_pos, num_agents, VIZ_DELAY)
+            Simulation.visualize_sim(grid, agents_pos, num_agents)
 
     assert num_agents == 6
     assert agents_pos.shape == (MAX_AGENTS, 2)
