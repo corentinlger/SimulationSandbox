@@ -56,7 +56,7 @@ class Simulation:
         return num_agents
         
     @staticmethod
-    def visualize_sim(grid, agents_pos, num_agents, delay=0.1):
+    def visualize_sim(grid, agents_pos, num_agents, delay=0.1, color="red"):
         if not plt.fignum_exists(1):
             plt.ion()
             plt.figure(figsize=(10, 10))
@@ -65,7 +65,7 @@ class Simulation:
 
         plt.imshow(grid, cmap="viridis", origin="upper")
         plt.scatter(
-            agents_pos[:num_agents, 0], agents_pos[:num_agents, 1], color="red", marker="o", label="Agents"
+            agents_pos[:num_agents, 0], agents_pos[:num_agents, 1], color=color, marker="o", label="Agents"
         )
         plt.title("Multi-Agent Simulation")
         plt.xlabel("X-axis")
