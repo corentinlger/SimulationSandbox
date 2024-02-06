@@ -3,7 +3,7 @@ import pickle
 import threading
 
 SERVER = '10.204.2.189'
-SERVER = '192.168.1.24'
+# SERVER = '192.168.1.24'
 PORT = 5050
 ADDR = (SERVER, PORT)
 
