@@ -3,6 +3,7 @@ from functools import partial
 import jax.numpy as jnp
 from jax import random, jit
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 
 class Simulation:
@@ -75,6 +76,21 @@ class Simulation:
         plt.draw()
         plt.pause(delay)
 
+    @staticmethod
+    def visualize_sim_panel(grid, agents_pos, num_agents, color="red"):
+        fig = Figure()
+        ax = fig.subplots()
+
+        ax.imshow(grid, cmap="viridis", origin="upper")
+        ax.scatter(
+            agents_pos[:num_agents, 0], agents_pos[:num_agents, 1], color=color, marker="o", label="Agents"
+        )
+        ax.set_title("Multi-Agent Simulation")
+        ax.set_xlabel("X-axis")
+        ax.set_ylabel("Y-axis")
+        ax.legend()
+
+        return fig
 
     def get_env_params(self):
         return self.grid_size, self.max_agents
