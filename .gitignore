@@ -4,3 +4,5 @@ myvenv
 __pycache__/
 random/
 test.ipynb
+.venv
+.vscode
