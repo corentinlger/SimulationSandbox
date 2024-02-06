@@ -5,4 +5,4 @@ params:
   num_steps: 50
   random_seed: 0
   visualize: True
-  viz_delay: 0.1
+  step_delay: 0.1

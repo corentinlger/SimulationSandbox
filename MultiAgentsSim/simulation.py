@@ -2,12 +2,29 @@ from functools import partial
 
 import jax.numpy as jnp
 from jax import random, jit
+from flax import struct
 import matplotlib.pyplot as plt
+
+
+# import matplotlib
+# matplotlib.use('agg')
+
+# TODO : 
+@struct.dataclass
+class SimState:
+    time: int
+
+@struct.dataclass
+class SimParams:
+    max_agents: int
+    grid_size: int 
+
 
 
 class Simulation:
     def __init__(self, max_agents, grid_size):
         self.grid_size = grid_size
+        self.grid = self.init_grid(grid_size)
         self.max_agents = max_agents
 
     def init_grid(self, grid_size):
@@ -56,7 +73,7 @@ class Simulation:
         return num_agents
         
     @staticmethod
-    def visualize_sim(grid, agents_pos, num_agents, delay=0.1, color="red"):
+    def visualize_sim(grid, agents_pos, num_agents, color="red"):
         if not plt.fignum_exists(1):
             plt.ion()
             plt.figure(figsize=(10, 10))
@@ -73,7 +90,7 @@ class Simulation:
         plt.legend()
 
         plt.draw()
-        plt.pause(delay)
+        plt.pause(0.001)
 
 
     def get_env_params(self):

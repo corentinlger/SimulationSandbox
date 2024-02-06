@@ -1,3 +1,5 @@
+import time 
+
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from jax import random
@@ -15,7 +17,7 @@ def main(cfg: DictConfig):
     grid_size = cfg.params.grid_size
     num_steps = cfg.params.num_steps
     visualize = cfg.params.visualize
-    viz_delay = cfg.params.viz_delay
+    step_delay = cfg.params.step_delay
 
     key = random.PRNGKey(cfg.params.random_seed)
 
@@ -30,6 +32,7 @@ def main(cfg: DictConfig):
     
     color = "red"
     for step in range(num_steps):
+        time.sleep(step_delay)
         key, a_key, add_key = random.split(key, 3)
 
         if step % 10 == 0:
@@ -50,7 +53,7 @@ def main(cfg: DictConfig):
         agents_states += 0.1
 
         if visualize:
-            Simulation.visualize_sim(grid, agents_pos, num_agents, viz_delay, color)
+            Simulation.visualize_sim(grid, agents_pos, num_agents, color)
 
     print("\nSimulation ended")
 
