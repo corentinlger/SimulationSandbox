@@ -1,17 +1,13 @@
 import socket
 import pickle
-import threading
 
 from MultiAgentsSim.simulation import Simulation
+from MultiAgentsSim.utils.network import SERVER
 
-SERVER = '10.204.2.189'
-SERVER = '192.168.1.24'
 
 PORT = 5050
 ADDR = (SERVER, PORT)
-
 DATA_SIZE = 4096
-
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
@@ -23,7 +19,7 @@ response = "RECEIVE"
 client.send(response.encode())
 print(f"responded: {response}")
 
-def receive():
+def receive_loop():
     while True:
         try:
             raw_data = client.recv(DATA_SIZE)
@@ -38,8 +34,4 @@ def receive():
             client.close()
             break
 
-# Matplotlib intreactive doesn't work outside the main thread
-# receive_thread = threading.Thread(target=receive)
-# receive_thread.start()
-        
-receive()
+receive_loop()

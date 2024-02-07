@@ -7,14 +7,9 @@ import jax
 
 from MultiAgentsSim.simulation import Simulation
 from MultiAgentsSim.agents import Agents
+from MultiAgentsSim.utils.network import SERVER
 
 
-# Create and start the server 
-SERVER = '10.204.2.189'
-# SERVER = socket.gethostbyname(socket.gethostname())
-# print(f"{SERVER = }")
-
-SERVER = '192.168.1.24'
 PORT = 5050
 ADDR = (SERVER, PORT)
 DATA_SIZE = 4096 # size of data that is being transfered at each timestep
@@ -36,7 +31,6 @@ SEED = 0
 
 
 key = jax.random.PRNGKey(SEED)
-
 sim = Simulation(MAX_AGENTS, GRID_SIZE)
 agents = Agents(MAX_AGENTS, GRID_SIZE)
 
@@ -65,10 +59,10 @@ def update_latest_data():
         timestep += 1
         time.sleep(STEP_DELAY)
 
+
 def update_color(new_color):
     global latest_data
     latest_data = latest_data[:5] + (new_color,) + (latest_data[6],)
-    print(f"entered the update color function and changed it")
 
 
 def handle_client(client, addr):
@@ -95,10 +89,8 @@ def handle_client(client, addr):
             while True:
                 try:
                     new_color = pickle.loads(client.recv(DATA_SIZE))
-                    print(f"{color = } before")
                     print(f"received new color {new_color} from client")
                     update_color(new_color)
-                    print(f"{color = } after")
                 except socket.error as e:
                     print(f"error: {e}")
                     client.close()
