@@ -5,7 +5,6 @@ from omegaconf import DictConfig, OmegaConf
 from jax import random
 
 from MultiAgentsSim.simulation import Simulation
-from MultiAgentsSim.agents import Agents
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")

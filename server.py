@@ -7,7 +7,6 @@ import jax
 from jax import random
 
 from MultiAgentsSim.simulation import Simulation
-from MultiAgentsSim.agents import Agents
 from MultiAgentsSim.utils.network import SERVER
 
 # Initialize server parameters

@@ -5,7 +5,6 @@ import jax.numpy as jnp
 from jax import random
 
 from MultiAgentsSim.simulation import Simulation
-from MultiAgentsSim.agents import Agents
 
 
 NUM_AGENTS = 5 
