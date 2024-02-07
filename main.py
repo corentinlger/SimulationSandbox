@@ -30,7 +30,7 @@ def main(cfg: DictConfig):
     # Launch a simulation
     print("\nSimulation started")
     
-    color = "red"
+    color = (1.0, 0.0, 0.0)
     for step in range(num_steps):
         time.sleep(step_delay)
         key, a_key, add_key = random.split(key, 3)
@@ -41,12 +41,12 @@ def main(cfg: DictConfig):
         if step == 20:
             for _ in range(8):
                 agents_pos, agents_states, num_agents = sim.add_agent(agents_pos, agents_states, num_agents, add_key)
-                color = "yellow"
+                color = (1.0, 1.0, 0.0)
             
         if step == 40:
             for _ in range(4):
                 num_agents = sim.remove_agent(num_agents)
-                color = "green"
+                color = (0.0, 1.0, 0.0)
 
         actions = agents.choose_action(agents_pos, a_key)
         agents_pos = sim.move_agents(agents_pos, actions)
