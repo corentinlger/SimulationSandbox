@@ -5,7 +5,8 @@ import threading
 from MultiAgentsSim.simulation import Simulation
 
 SERVER = '10.204.2.189'
-# SERVER = '192.168.1.24'
+SERVER = '192.168.1.24'
+
 PORT = 5050
 ADDR = (SERVER, PORT)
 
@@ -29,6 +30,7 @@ def receive():
             data = pickle.loads(raw_data)
             print(f"data received: {data}")
             timestep, grid, agents_pos, agents_states, num_agents, color, key = data
+            print(f"{color = }")
             Simulation.visualize_sim(grid, agents_pos, num_agents, color)
 
         except socket.error as e:

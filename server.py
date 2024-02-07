@@ -8,10 +8,16 @@ import jax
 from MultiAgentsSim.simulation import Simulation
 from MultiAgentsSim.agents import Agents
 
+
+# Create and start the server 
 SERVER = '10.204.2.189'
-# SERVER = '192.168.1.24'
+# SERVER = socket.gethostbyname(socket.gethostname())
+# print(f"{SERVER = }")
+
+SERVER = '192.168.1.24'
 PORT = 5050
 ADDR = (SERVER, PORT)
+DATA_SIZE = 4096 # size of data that is being transfered at each timestep
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
@@ -19,8 +25,7 @@ server.listen()
 print(f"Server started and listening ...")
 
 
-
-# SIM PART
+# Initialize simulation parameters
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
 GRID_SIZE = 20 
@@ -29,17 +34,16 @@ VIZUALIZE = True
 STEP_DELAY = 0.3
 SEED = 0
 
-DATA_SIZE = 4096
 
 key = jax.random.PRNGKey(SEED)
 
 sim = Simulation(MAX_AGENTS, GRID_SIZE)
 agents = Agents(MAX_AGENTS, GRID_SIZE)
 
+# Create initial simulation state 
 grid = sim.init_grid(GRID_SIZE)
 agents_pos, agents_states, num_agents = agents.init_agents(NUM_AGENTS, MAX_AGENTS, key)
-color = "red"
-
+color = (1.0, 0.0, 0.0)
 
 
 def get_new_timestep_data(timestep, grid, agents_pos, agents_states, num_agents, color, key):
@@ -61,9 +65,11 @@ def update_latest_data():
         timestep += 1
         time.sleep(STEP_DELAY)
 
-def update_array_size(new_size):
-    global array_size
-    array_size = new_size
+def update_color(new_color):
+    global latest_data
+    latest_data = latest_data[:5] + (new_color,) + (latest_data[6],)
+    print(f"entered the update color function and changed it")
+
 
 def handle_client(client, addr):
     try:
@@ -88,8 +94,11 @@ def handle_client(client, addr):
         elif response == "UPDATE":
             while True:
                 try:
-                    new_size = pickle.loads(client.recv(DATA_SIZE))
-                    update_array_size(new_size)
+                    new_color = pickle.loads(client.recv(DATA_SIZE))
+                    print(f"{color = } before")
+                    print(f"received new color {new_color} from client")
+                    update_color(new_color)
+                    print(f"{color = } after")
                 except socket.error as e:
                     print(f"error: {e}")
                     client.close()

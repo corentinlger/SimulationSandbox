@@ -6,6 +6,7 @@ from jax import random
 from MultiAgentsSim.simulation import Simulation
 from MultiAgentsSim.agents import Agents
 
+
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
 GRID_SIZE = 20 
@@ -36,6 +37,7 @@ def test_simulation_run():
 
     grid = sim.init_grid(GRID_SIZE)
     agents_pos, agents_states, num_agents = agents.init_agents(NUM_AGENTS, MAX_AGENTS, key)
+    color = (1.0, 0.0, 0.0)
 
     for step in range(NUM_STEPS):
         time.sleep(STEP_DELAY)
@@ -57,27 +59,8 @@ def test_simulation_run():
         agents_states += 0.1
 
         if VIZUALIZE:
-            Simulation.visualize_sim(grid, agents_pos, num_agents)
+            Simulation.visualize_sim(grid, agents_pos, num_agents, color)
 
     assert num_agents == 6
     assert agents_pos.shape == (MAX_AGENTS, 2)
-
-
-# def test_add_remove_agents():
-#     key = jax.random.PRNGKey(SEED)
-
-#     sim = Simulation(num_agents=NUM_AGENTS, max_agents=MAX_AGENTS, grid_size=GRID_SIZE, key=key)
-#     grid, agents_pos, agents_states, key = sim.get_env_state()
-
-#     assert sim.num_agents == 5
-
-#     for i in range(15):
-#         agents_pos, agents_states = sim.add_agent(agents_pos, agents_states)
-
-#     assert sim.num_agents == MAX_AGENTS
-
-#     for i in range(15):
-#         sim.remove_agent()
-    
-#     assert sim.num_agents == 0
 
