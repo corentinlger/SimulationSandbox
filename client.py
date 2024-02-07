@@ -4,7 +4,7 @@ import pickle
 from MultiAgentsSim.simulation import Simulation
 from MultiAgentsSim.utils.network import SERVER
 
-
+print(f"{SERVER = }")
 PORT = 5050
 ADDR = (SERVER, PORT)
 DATA_SIZE = 4096
@@ -20,14 +20,15 @@ client.send(response.encode())
 print(f"responded: {response}")
 
 def receive_loop():
+    print(f"entered receive loop")
     while True:
         try:
             raw_data = client.recv(DATA_SIZE)
             data = pickle.loads(raw_data)
             print(f"data received: {data}")
-            timestep, grid, agents_pos, agents_states, num_agents, color, key = data
+            state, color = data
             print(f"{color = }")
-            Simulation.visualize_sim(grid, agents_pos, num_agents, color)
+            Simulation.visualize_sim(state, color)
 
         except socket.error as e:
             print(e)

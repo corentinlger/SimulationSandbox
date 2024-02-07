@@ -1,6 +1,7 @@
 params:
   num_agents: 5
   max_agents: 10
+  num_obs: 3
   grid_size: 20
   num_steps: 50
   random_seed: 0
