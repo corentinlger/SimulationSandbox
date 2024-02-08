@@ -4,6 +4,7 @@ import jax.numpy as jnp
 from jax import random, jit
 from flax import struct
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 from MultiAgentsSim.base import Simulation, SimState
 
@@ -100,5 +101,23 @@ class SimpleSimulation(Simulation):
         plt.draw()
         plt.pause(0.001)
 
+    @staticmethod
+    def visualize_panel(state, color, grid_size=None):
+        fig = Figure()
+        ax = fig.subplots()
+        ax.imshow(state.grid, cmap="viridis", origin="upper")
+
+        alive_agents = jnp.where(state.alive != 0.0)
+        agents_x_pos = state.x_pos[alive_agents]
+        agents_y_pos = state.y_pos[alive_agents]
+        ax.scatter(
+            agents_x_pos, agents_y_pos, color=color, marker="o", label="Agents"
+        )
+        ax.set_title("Multi-Agent Simulation")
+        ax.set_xlabel("X-axis")
+        ax.set_ylabel("Y-axis")
+        ax.legend()
+
+        return fig
 
     
