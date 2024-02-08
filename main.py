@@ -4,8 +4,8 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from jax import random
 
-from MultiAgentsSim.simulation import Simulation
-from MultiAgentsSim.agents import Agents
+from MultiAgentsSim.simple_simulation import SimpleSimulation
+from MultiAgentsSim.three_d_simulation import ThreeDSimulation
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -14,47 +14,54 @@ def main(cfg: DictConfig):
 
     num_agents = cfg.params.num_agents
     max_agents = cfg.params.max_agents
+    num_obs = cfg.params.num_obs
     grid_size = cfg.params.grid_size
     num_steps = cfg.params.num_steps
     visualize = cfg.params.visualize
     step_delay = cfg.params.step_delay
+    sim_type = cfg.params.sim_type
 
     key = random.PRNGKey(cfg.params.random_seed)
+    color = (1.0, 0.0, 0.0)
+
+    # Choose a simulation type
+    if sim_type == "simple":
+        Simulation = SimpleSimulation
+    elif sim_type == "three_d":
+        Simulation = ThreeDSimulation
+    else:
+        raise(ValueError(f"Unknown sim type {sim_type}"))
 
     sim = Simulation(max_agents, grid_size)
-    agents = Agents(max_agents, grid_size)
+    state = sim.init_state(num_agents, num_obs, key)
 
-    grid = sim.init_grid(grid_size)
-    agents_pos, agents_states, num_agents = agents.init_agents(num_agents, max_agents, key)
 
     # Launch a simulation
-    print("\nSimulation started")
-    
-    color = (1.0, 0.0, 0.0)
-    for step in range(num_steps):
+    print("Simulation started")
+    for timestep in range(num_steps):
         time.sleep(step_delay)
-        key, a_key, add_key = random.split(key, 3)
+        key, a_key, step_key = random.split(key, 3)
 
-        if step % 10 == 0:
-            print(f"step {step}")
-        
-        if step == 20:
-            for _ in range(8):
-                agents_pos, agents_states, num_agents = sim.add_agent(agents_pos, agents_states, num_agents, add_key)
-                color = (1.0, 1.0, 0.0)
-            
-        if step == 40:
-            for _ in range(4):
-                num_agents = sim.remove_agent(num_agents)
-                color = (0.0, 1.0, 0.0)
+        if timestep % 10 == 0:
+            print(f"step {timestep}")
+            print(f"{state.x_pos = }")
+            print(f"{state.y_pos = }")
 
-        actions = agents.choose_action(agents_pos, a_key)
-        agents_pos = sim.move_agents(agents_pos, actions)
-        agents_states += 0.1
+        if timestep == 20:
+            state = sim.add_agent(state, 7)
+            state = sim.add_agent(state, 9)
+            state = sim.add_agent(state, 5)
+
+        if timestep == 40:
+            state = sim.remove_agent(state, 2)
+            state = sim.remove_agent(state, 1)
+            state = sim.remove_agent(state, 4)
+
+        actions = sim.choose_action(state.obs, a_key)
+        state = sim.step(state, actions, step_key)
 
         if visualize:
-            Simulation.visualize_sim(grid, agents_pos, num_agents, color)
-
+            Simulation.visualize_sim(state, color, grid_size)
     print("\nSimulation ended")
 
 if __name__ == "__main__":

@@ -6,6 +6,10 @@ from MultiAgentsSim.utils.network import SERVER
 
 PORT = 5050
 DATA_SIZE = 4096
+COLORS = {1: "red",
+          2: "green",
+          3: "blue"
+          }
 
 update_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 update_client.connect((SERVER, PORT))
@@ -20,11 +24,11 @@ print(f"responded: {response}")
 def update_color_loop():
     while True:
         try:
-            color = input("Enter a color in rgb format: ")
-            tuple_color = tuple(float(value) for value in color.split(" "))
-            print(f"{tuple_color = }")
-            update_client.send(pickle.dumps(tuple_color))
-            print(f"sent {tuple_color} to server")
+            color_idx = int(input(f"Enter the color idx of your choice {COLORS}: "))
+            print(f"{color_idx = }")
+            color = COLORS[color_idx]
+            update_client.send(pickle.dumps(color))
+            print(f"sent {color} to server")
         except socket.error as e:
             print(f"error: {e}")
             update_client.close()
