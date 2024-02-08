@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 
-# import matplotlib
-# matplotlib.use('agg')
-
 # TODO : 
 @struct.dataclass
 class SimState:
@@ -28,8 +25,10 @@ class Simulation:
         self.grid = self.init_grid(grid_size)
         self.max_agents = max_agents
 
+
     def init_grid(self, grid_size):
         return jnp.zeros((grid_size, grid_size), dtype=jnp.float32)
+
 
     def init_agents(self, num_agents, max_agents, key):
         if num_agents > max_agents:
@@ -45,14 +44,17 @@ class Simulation:
         
         return agents_pos, agents_states, num_agents
     
+
     def choose_random_action(self, agents_pos, key_a):
         return random.randint(key_a, agents_pos.shape, -1, 2)
     
+
     @partial(jit, static_argnums=(0, ))
     def move_agents(self, agents_pos, agents_movements):
         agents_pos += agents_movements
         return jnp.clip(agents_pos, 0, self.grid_size - 1)
     
+
     def add_agent(self, agents_pos, agents_states, num_agents, key):
         if num_agents < self.max_agents:
             agents_pos = agents_pos.at[num_agents].set(*random.randint(key, (1, 2), 0, self.grid_size))
@@ -65,6 +67,7 @@ class Simulation:
 
         return agents_pos, agents_states, num_agents
 
+
     def remove_agent(self, num_agents):
         if num_agents <= 0:
             print("There is no agents to remove")
@@ -73,6 +76,7 @@ class Simulation:
             print(f"Removed agent {num_agents + 1}")
         return num_agents
         
+
     @staticmethod
     def visualize_sim(grid, agents_pos, num_agents, color):
         if not plt.fignum_exists(1):
