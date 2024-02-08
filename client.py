@@ -1,7 +1,7 @@
 import socket
 import pickle
 
-from MultiAgentsSim.simulation import Simulation
+from MultiAgentsSim.simple_simulation import SimpleSimulation
 from MultiAgentsSim.utils.network import SERVER
 
 print(f"{SERVER = }")
@@ -28,7 +28,7 @@ def receive_loop():
             print(f"data received: {data}")
             state, color = data
             print(f"{color = }")
-            Simulation.visualize_sim(state, color)
+            SimpleSimulation.visualize_sim(state, color)
 
         except socket.error as e:
             print(e)

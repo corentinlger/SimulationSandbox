@@ -4,8 +4,8 @@ import jax
 import jax.numpy as jnp
 from jax import random
 
-from MultiAgentsSim.simulation import Simulation
-
+from MultiAgentsSim.simple_simulation import SimpleSimulation
+from MultiAgentsSim.three_d_simulation import ThreeDSimulation
 
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
@@ -19,9 +19,8 @@ SEED = 0
 
 def test_simulation_init():
     key = random.PRNGKey(SEED)
-    color = (1.0, 0.0, 0.0)
 
-    sim = Simulation(MAX_AGENTS, GRID_SIZE)
+    sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
     state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
 
     assert sim.max_agents == MAX_AGENTS
@@ -31,11 +30,11 @@ def test_simulation_init():
     assert state.grid.shape == (GRID_SIZE, GRID_SIZE)
 
 
-def test_simulation_run():
+def test_simple_simulation_run():
     key = random.PRNGKey(SEED)
     color = (1.0, 0.0, 0.0)
 
-    sim = Simulation(MAX_AGENTS, GRID_SIZE)
+    sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
     state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
 
     # Launch a simulation
@@ -63,10 +62,46 @@ def test_simulation_run():
         state = sim.step(state, actions, step_key)
 
         if VIZUALIZE:
-            Simulation.visualize_sim(state, color)
+            SimpleSimulation.visualize_sim(state, color)
     print("\nSimulation ended")
     
     assert jnp.sum(state.alive) == 5
     assert state.x_pos.shape == (MAX_AGENTS,)
     assert state.time == NUM_STEPS
+
+
+def test_three_d_simulation_run():
+    key = random.PRNGKey(SEED)
+    sim = ThreeDSimulation(MAX_AGENTS, GRID_SIZE)
+    state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
+    color = (1.0, 0.0, 0.0)
+
+
+    # Launch a simulation
+    print("Simulation started")
+    for timestep in range(NUM_STEPS):
+        time.sleep(STEP_DELAY)
+        key, a_key, step_key = random.split(key, 3)
+
+        if timestep % 10 == 0:
+            print(f"step {timestep}")
+            print(f"{state.x_pos = }")
+            print(f"{state.y_pos = }")
+
+        if timestep == 20:
+            state = sim.add_agent(state, 7)
+            state = sim.add_agent(state, 9)
+            state = sim.add_agent(state, 5)
+
+        if timestep == 40:
+            state = sim.remove_agent(state, 2)
+            state = sim.remove_agent(state, 1)
+            state = sim.remove_agent(state, 4)
+
+        actions = sim.choose_action(state.obs, a_key)
+        state = sim.step(state, actions, step_key)
+
+        if VIZUALIZE:
+            ThreeDSimulation.visualize_sim(state, color, GRID_SIZE)
+    print("\nSimulation ended")
 

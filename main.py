@@ -4,7 +4,8 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from jax import random
 
-from MultiAgentsSim.simulation import Simulation
+from MultiAgentsSim.simple_simulation import SimpleSimulation
+from MultiAgentsSim.three_d_simulation import ThreeDSimulation
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -18,9 +19,18 @@ def main(cfg: DictConfig):
     num_steps = cfg.params.num_steps
     visualize = cfg.params.visualize
     step_delay = cfg.params.step_delay
+    sim_type = cfg.params.sim_type
 
     key = random.PRNGKey(cfg.params.random_seed)
     color = (1.0, 0.0, 0.0)
+
+    # Choose a simulation type
+    if sim_type == "simple":
+        Simulation = SimpleSimulation
+    elif sim_type == "three_d":
+        Simulation = ThreeDSimulation
+    else:
+        raise(ValueError(f"Unknown sim type {sim_type}"))
 
     sim = Simulation(max_agents, grid_size)
     state = sim.init_state(num_agents, num_obs, key)
@@ -51,7 +61,7 @@ def main(cfg: DictConfig):
         state = sim.step(state, actions, step_key)
 
         if visualize:
-            Simulation.visualize_sim(state, color)
+            Simulation.visualize_sim(state, color, grid_size)
     print("\nSimulation ended")
 
 if __name__ == "__main__":

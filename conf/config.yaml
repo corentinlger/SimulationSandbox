@@ -7,3 +7,4 @@ params:
   random_seed: 0
   visualize: True
   step_delay: 0.1
+  sim_type: "simple"

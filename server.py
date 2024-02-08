@@ -6,7 +6,7 @@ import threading
 import jax
 from jax import random
 
-from MultiAgentsSim.simulation import Simulation
+from MultiAgentsSim.simple_simulation import SimpleSimulation
 from MultiAgentsSim.utils.network import SERVER
 
 # Initialize server parameters
@@ -27,12 +27,13 @@ NUM_OBS = 3
 GRID_SIZE = 20 
 NUM_STEPS = 50
 VIZUALIZE = True
-STEP_DELAY = 1
+STEP_DELAY = 0.5
+
 SEED = 0
 key = random.PRNGKey(SEED)
 color = (1.0, 0.0, 0.0)
 
-sim = Simulation(MAX_AGENTS, GRID_SIZE)
+sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
 state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
 
 # Create a global variable to store the current array size and data + lock and event to access it
