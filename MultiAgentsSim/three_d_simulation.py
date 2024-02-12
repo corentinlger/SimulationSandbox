@@ -11,6 +11,7 @@ from MultiAgentsSim.base import Simulation, SimState
 N_DIMS = 3
 
 # TODO : Add colors
+# Add another element in the flax dataclass so we can prove its rly ez 
 @struct.dataclass
 class ThreeDSimState(SimState):
     time: int

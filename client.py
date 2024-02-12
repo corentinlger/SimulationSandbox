@@ -1,38 +1,56 @@
+import time
 import socket
 import pickle
+
+from flax import serialization
 
 from MultiAgentsSim.simple_simulation import SimpleSimulation
 from MultiAgentsSim.utils.network import SERVER
 
-print(f"{SERVER = }")
 PORT = 5050
 ADDR = (SERVER, PORT)
-DATA_SIZE = 4096
+DATA_SIZE = 10835
+EVAL_TIME = 10
+color = "red"
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 print(f"Connected to {ADDR}")
 
 msg = client.recv(1024).decode()
-print(f"server message: {msg}")
+state_example = pickle.loads(client.recv(DATA_SIZE))
+state_bytes_size = len(serialization.to_bytes(state_example))
 response = "RECEIVE"
 client.send(response.encode())
-print(f"responded: {response}")
+time.sleep(1)
+
 
 def receive_loop():
-    print(f"entered receive loop")
+    i = 0 
     while True:
         try:
-            raw_data = client.recv(DATA_SIZE)
-            data = pickle.loads(raw_data)
-            print(f"data received: {data}")
-            state, color = data
-            print(f"{color = }")
-            SimpleSimulation.visualize_sim(state, color)
-
+            i += 1 
+            raw_data = client.recv(state_bytes_size)
+            state = serialization.from_bytes(state_example, raw_data)
+            SimpleSimulation.visualize_sim(state, color, grid_size=None)
+        
         except socket.error as e:
             print(e)
             client.close()
             break
 
+
+def test():
+    start = time.time()
+    i = 0 
+    while time.time() < start + EVAL_TIME:
+        i += 1 
+        raw_data = client.recv(state_bytes_size)
+        state = serialization.from_bytes(state_example, raw_data)
+        SimpleSimulation.visualize_sim(state, color, grid_size=None)
+    client.close()
+
+    print(f"{i = } : {i / EVAL_TIME } data received per second")
+
+# test()
 receive_loop()

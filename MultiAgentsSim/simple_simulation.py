@@ -98,7 +98,7 @@ class SimpleSimulation(Simulation):
         plt.legend()
 
         plt.draw()
-        plt.pause(0.001)
+        plt.pause(0.0001)
 
 
     

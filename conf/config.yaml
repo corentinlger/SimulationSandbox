@@ -6,5 +6,5 @@ params:
   num_steps: 50
   random_seed: 0
   visualize: True
-  step_delay: 0.1
+  step_delay: 0.05
   sim_type: "simple"
