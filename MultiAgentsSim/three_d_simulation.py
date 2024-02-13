@@ -21,6 +21,7 @@ class ThreeDSimState(SimState):
     y_pos: jnp.array
     z_pos: jnp.array
     obs: jnp.array
+    colors: jnp.array
 
 
 class ThreeDSimulation(Simulation):
@@ -38,7 +39,8 @@ class ThreeDSimulation(Simulation):
                         x_pos=random.randint(key=x_key, shape=(self.max_agents,), minval=0, maxval=self.grid_size),
                         y_pos=random.randint(key=y_key, shape=(self.max_agents,), minval=0, maxval=self.grid_size),
                         z_pos=random.randint(key=y_key, shape=(self.max_agents,), minval=0, maxval=self.grid_size),
-                        obs = jnp.zeros((self.max_agents, num_obs))
+                        obs = jnp.zeros((self.max_agents, num_obs)),
+                        colors=jnp.full(shape=(self.max_agents, 3), fill_value=jnp.array([1.0, 0.0, 0.0]))
                         )
     
 
@@ -81,7 +83,7 @@ class ThreeDSimulation(Simulation):
         pass
 
     @staticmethod
-    def visualize_sim(state, color, grid_size):
+    def visualize_sim(state, grid_size):
         if not plt.fignum_exists(1):
             plt.ion()
             fig = plt.figure(figsize=(10, 10))
@@ -89,18 +91,14 @@ class ThreeDSimulation(Simulation):
 
         plt.clf()
 
-        # Plot the 3D grid
-        # X, Y, Z = np.meshgrid(np.arange(state.grid.shape[0]),
-        #                     np.arange(state.grid.shape[1]),
-        #                     np.arange(state.grid.shape[2]))
         ax = plt.axes(projection='3d')
-        # ax.scatter(X, Y, Z, c=state.grid.flatten(), cmap='viridis')
 
         alive_agents = np.where(state.alive != 0.0)
         agents_x_pos = state.x_pos[alive_agents]
         agents_y_pos = state.y_pos[alive_agents]
         agents_z_pos = state.z_pos[alive_agents]
-        ax.scatter(agents_x_pos, agents_y_pos, agents_z_pos, color=color, marker="o", label="Agents")
+        agents_colors = state.colors[alive_agents]
+        ax.scatter(agents_x_pos, agents_y_pos, agents_z_pos, c=agents_colors, marker="o", label="Agents")
 
         ax.set_title("Multi-Agent Simulation")
         ax.set_xlabel("X-axis")

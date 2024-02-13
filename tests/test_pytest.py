@@ -4,7 +4,7 @@ import jax
 import jax.numpy as jnp
 from jax import random
 
-from MultiAgentsSim.simple_simulation import SimpleSimulation
+from MultiAgentsSim.two_d_simulation import SimpleSimulation
 from MultiAgentsSim.three_d_simulation import ThreeDSimulation
 
 NUM_AGENTS = 5 
@@ -32,8 +32,6 @@ def test_simulation_init():
 
 def test_simple_simulation_run():
     key = random.PRNGKey(SEED)
-    color = (1.0, 0.0, 0.0)
-
     sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
     state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
 
@@ -52,17 +50,21 @@ def test_simple_simulation_run():
             state = sim.add_agent(state, 7)
             state = sim.add_agent(state, 9)
             state = sim.add_agent(state, 5)
+            state = state.replace(colors=state.colors.at[0, 2].set(1.0))
+
 
         if timestep == 40:
             state = sim.remove_agent(state, 2)
             state = sim.remove_agent(state, 1)
             state = sim.remove_agent(state, 4)
+            state = state.replace(colors=state.colors.at[7, 1].set(1.0))
+
 
         actions = sim.choose_action(state.obs, a_key)
         state = sim.step(state, actions, step_key)
 
         if VIZUALIZE:
-            SimpleSimulation.visualize_sim(state, color)
+            SimpleSimulation.visualize_sim(state, grid_size=None)
     print("\nSimulation ended")
     
     assert jnp.sum(state.alive) == 5
@@ -74,8 +76,6 @@ def test_three_d_simulation_run():
     key = random.PRNGKey(SEED)
     sim = ThreeDSimulation(MAX_AGENTS, GRID_SIZE)
     state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
-    color = (1.0, 0.0, 0.0)
-
 
     # Launch a simulation
     print("Simulation started")
@@ -92,16 +92,18 @@ def test_three_d_simulation_run():
             state = sim.add_agent(state, 7)
             state = sim.add_agent(state, 9)
             state = sim.add_agent(state, 5)
+            state = state.replace(colors=state.colors.at[0, 2].set(1.0))
 
         if timestep == 40:
             state = sim.remove_agent(state, 2)
             state = sim.remove_agent(state, 1)
             state = sim.remove_agent(state, 4)
+            state = state.replace(colors=state.colors.at[7, 1].set(1.0))
 
         actions = sim.choose_action(state.obs, a_key)
         state = sim.step(state, actions, step_key)
 
         if VIZUALIZE:
-            ThreeDSimulation.visualize_sim(state, color, GRID_SIZE)
+            ThreeDSimulation.visualize_sim(state, grid_size=GRID_SIZE)
     print("\nSimulation ended")
 

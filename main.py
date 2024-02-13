@@ -4,7 +4,7 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from jax import random
 
-from MultiAgentsSim.simple_simulation import SimpleSimulation
+from MultiAgentsSim.two_d_simulation import SimpleSimulation
 from MultiAgentsSim.three_d_simulation import ThreeDSimulation
 
 
@@ -22,10 +22,9 @@ def main(cfg: DictConfig):
     sim_type = cfg.params.sim_type
 
     key = random.PRNGKey(cfg.params.random_seed)
-    color = (1.0, 0.0, 0.0)
 
     # Choose a simulation type
-    if sim_type == "simple":
+    if sim_type == "two_d":
         Simulation = SimpleSimulation
     elif sim_type == "three_d":
         Simulation = ThreeDSimulation
@@ -43,25 +42,28 @@ def main(cfg: DictConfig):
         key, a_key, step_key = random.split(key, 3)
 
         if timestep % 10 == 0:
-            print(f"step {timestep}")
-            print(f"{state.x_pos = }")
-            print(f"{state.y_pos = }")
+            print(f"\nstep {timestep}")
 
-        if timestep == 20:
+        if timestep == (num_steps // 3):
+            # Add 3 agents and change the color of an agent
             state = sim.add_agent(state, 7)
             state = sim.add_agent(state, 9)
             state = sim.add_agent(state, 5)
+            state = state.replace(colors=state.colors.at[0, 2].set(1.0))
 
-        if timestep == 40:
+        if timestep ==  2* (num_steps // 3):
+            # Remove 3 other agents and change the color of another agent
             state = sim.remove_agent(state, 2)
             state = sim.remove_agent(state, 1)
             state = sim.remove_agent(state, 4)
+            state = state.replace(colors=state.colors.at[7, 1].set(1.0))
+
 
         actions = sim.choose_action(state.obs, a_key)
         state = sim.step(state, actions, step_key)
 
         if visualize:
-            Simulation.visualize_sim(state, color, grid_size)
+            Simulation.visualize_sim(state, grid_size)
     print("\nSimulation ended")
 
 if __name__ == "__main__":
