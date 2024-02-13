@@ -40,10 +40,13 @@ print(f"Server started and listening ...")
 key = random.PRNGKey(SEED)
 sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
 state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
+state_byte_size = len(serialization.to_bytes(state))
 
+# TODO : Rethink the code to delete the latest data var and only use state 
 # Shared variables and locks
 latest_data = state
 data_lock = threading.Lock()
+state_lock = threading.Lock()
 new_data_event = threading.Event()
 
 
@@ -54,12 +57,13 @@ def update_latest_data():
     global key
 
     while True:
-        key, a_key, step_key = random.split(key, 3)
-        actions = sim.choose_action(state.obs, a_key)
-        state = sim.step(state, actions, step_key)
-        with data_lock:
-            latest_data = state
-        new_data_event.set()
+        with state_lock:
+            key, a_key, step_key = random.split(key, 3)
+            actions = sim.choose_action(state.obs, a_key)
+            state = sim.step(state, actions, step_key)
+            with data_lock:
+                latest_data = state
+            new_data_event.set()
         time.sleep(STEP_DELAY)
 
 
@@ -79,15 +83,45 @@ def establish_connection(client, addr):
 
 
 # Define how to communicate with a client
-def communicate_with_client(connection_type):
+def communicate_with_client(client, addr, connection_type):
+    global state
+
     if connection_type == "RECEIVE":
             while True:
                 try:
                     new_data_event.wait()
                     with data_lock:
-                        serialized_data = serialization.to_bytes(latest_data)
-                        client.send(serialized_data)   
+                        client.send(serialization.to_bytes(latest_data))   
                     new_data_event.clear()
+
+                except socket.error as e:
+                    print(f"error: {e}")
+                    client.close()
+                    print(f"Client {addr} disconnected")
+                    break
+
+    elif connection_type == "NOTEBOOK":
+            while True:
+                try:
+                    request = client.recv(DATA_SIZE).decode()
+                    print(f"{request}")
+                    if request == "CLOSE_CONNECTION":
+                        client.close()
+                        print(f"Client {addr} disconnected")
+
+                    elif request == "GET_STATE":
+                        with data_lock:
+                            client.send(serialization.to_bytes(latest_data))   
+
+                    elif request == "SET_STATE":
+                        with data_lock:
+                            client.send(serialization.to_bytes(latest_data))  
+                            updated_state = serialization.from_bytes(state, client.recv(state_byte_size))  
+                            with state_lock:
+                                state = updated_state
+                    
+                    else:
+                        print(f"Unknow request type {request}")
 
                 except socket.error as e:
                     print(f"error: {e}")
@@ -102,7 +136,7 @@ def communicate_with_client(connection_type):
 # Function to handle a client when it connects to the server 
 def handle_client(client, addr):
     connection_type = establish_connection(client, addr)
-    communicate_with_client(connection_type)
+    communicate_with_client(client, addr, connection_type)
 
 
 # Create a thread to continuously update the data

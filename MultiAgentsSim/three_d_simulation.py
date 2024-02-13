@@ -10,8 +10,6 @@ from MultiAgentsSim.base import Simulation, SimState
 
 N_DIMS = 3
 
-# TODO : Add colors
-# Add another element in the flax dataclass so we can prove its rly ez 
 @struct.dataclass
 class ThreeDSimState(SimState):
     time: int
@@ -29,7 +27,6 @@ class ThreeDSimulation(Simulation):
         self.max_agents = max_agents
         self.grid_size = grid_size
 
-
     @partial(jit, static_argnums=(0, 1, 2))
     def init_state(self, num_agents, num_obs, key):
         x_key, y_key = random.split(key)
@@ -42,13 +39,11 @@ class ThreeDSimulation(Simulation):
                         obs = jnp.zeros((self.max_agents, num_obs)),
                         colors=jnp.full(shape=(self.max_agents, 3), fill_value=jnp.array([1.0, 0.0, 0.0]))
                         )
-    
 
     @partial(jit, static_argnums=(0,))
     def choose_action(self, obs, key):
         return random.randint(key, shape=(obs.shape[0], N_DIMS), minval=-1, maxval=2)
     
-
     @partial(jit, static_argnums=(0,))
     def step(self, sim_state, actions, key):
         x_pos = jnp.clip(sim_state.x_pos + actions[:, 0], 0, self.grid_size - 1)
@@ -57,7 +52,6 @@ class ThreeDSimulation(Simulation):
         time = sim_state.time + 1
         sim_state = sim_state.replace(time=time, x_pos=x_pos, y_pos=y_pos, z_pos=z_pos)
         return sim_state
-    
 
     def add_agent(self, sim_state, agent_idx):
         sim_state = sim_state.replace(alive=sim_state.alive.at[agent_idx].set(1.0))
@@ -69,18 +63,9 @@ class ThreeDSimulation(Simulation):
         sim_state = sim_state.replace(alive=sim_state.alive.at[agent_idx].set(0.0))
         print(f"agent {agent_idx} removed")
         return sim_state
-    
 
     def get_env_params(self):
         return self.grid_size, self.max_agents
-
-    @staticmethod
-    def encode(state):
-        pass
-
-    @staticmethod
-    def decode(state):
-        pass
 
     @staticmethod
     def visualize_sim(state, grid_size):
