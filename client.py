@@ -4,14 +4,13 @@ import pickle
 
 from flax import serialization
 
-from MultiAgentsSim.simple_simulation import SimpleSimulation
+from MultiAgentsSim.two_d_simulation import SimpleSimulation
 from MultiAgentsSim.utils.network import SERVER
 
 PORT = 5050
 ADDR = (SERVER, PORT)
 DATA_SIZE = 10835
 EVAL_TIME = 10
-color = "red"
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
@@ -32,7 +31,7 @@ def receive_loop():
             i += 1 
             raw_data = client.recv(state_bytes_size)
             state = serialization.from_bytes(state_example, raw_data)
-            SimpleSimulation.visualize_sim(state, color, grid_size=None)
+            SimpleSimulation.visualize_sim(state, grid_size=None)
         
         except socket.error as e:
             print(e)
@@ -47,7 +46,7 @@ def test():
         i += 1 
         raw_data = client.recv(state_bytes_size)
         state = serialization.from_bytes(state_example, raw_data)
-        SimpleSimulation.visualize_sim(state, color, grid_size=None)
+        SimpleSimulation.visualize_sim(state, grid_size=None)
     client.close()
 
     print(f"{i = } : {i / EVAL_TIME } data received per second")
