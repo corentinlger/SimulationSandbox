@@ -7,11 +7,11 @@ import argparse
 from jax import random
 from flax import serialization
 
-from MultiAgentsSim.two_d_simulation import SimpleSimulation
-from MultiAgentsSim.three_d_simulation import ThreeDSimulation
 from MultiAgentsSim.utils.network import SERVER
+from MultiAgentsSim.sim_types import SIMULATIONS
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--sim_type', type=str, default="two_d")
 parser.add_argument('--step_delay', type=float, default=0.1)
 args = parser.parse_args()
 
@@ -19,9 +19,10 @@ args = parser.parse_args()
 # Networking constants
 PORT = 5050
 ADDR = (SERVER, PORT)
-DATA_SIZE = 10835
+DATA_SIZE = 40000
 STEP_DELAY = args.step_delay
 # Simulation constants
+SIM_TYPE = args.sim_type
 SEED = 0
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
@@ -37,8 +38,9 @@ print(f"Server started and listening ...")
 
 
 # Initialize simulation
+Simulation = SIMULATIONS[SIM_TYPE]
 key = random.PRNGKey(SEED)
-sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
+sim = Simulation(MAX_AGENTS, GRID_SIZE)
 state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
 state_byte_size = len(serialization.to_bytes(state))
 
@@ -49,6 +51,7 @@ data_lock = threading.Lock()
 state_lock = threading.Lock()
 new_data_event = threading.Event()
 
+print(f"{len(pickle.dumps(latest_data))}")
 
 # Continuously update the state of the simulation
 def update_latest_data():
@@ -70,7 +73,7 @@ def update_latest_data():
 # Establish a connection with a client
 def establish_connection(client, addr):
     try:
-        client.send("RECEIVE_OR_UPDATE".encode())
+        client.send(SIM_TYPE.encode())
         client.send(pickle.dumps(latest_data))
         connection_type = client.recv(DATA_SIZE).decode()
         print(f"{connection_type} connection established with {addr}")
