@@ -3,6 +3,8 @@ from functools import partial
 import jax.numpy as jnp
 from jax import random, jit
 from flax import struct
+import matplotlib
+matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
 from MultiAgentsSim.base import Simulation, SimState
@@ -49,8 +51,6 @@ class SimpleSimulation(Simulation):
         sim_state = sim_state.replace(time=time, x_pos=x_pos, y_pos=y_pos)
         return sim_state
     
-
-    # TODO : See if I had if conditions to check wether the idx is valid or not, or if I jit the function
     def add_agent(self, sim_state, agent_idx):
         sim_state = sim_state.replace(alive=sim_state.alive.at[agent_idx].set(1.0))
         print(f"agent {agent_idx} added")
