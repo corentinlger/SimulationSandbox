@@ -3,11 +3,9 @@ from functools import partial
 import jax.numpy as jnp
 from jax import random, jit
 from flax import struct
-import matplotlib
-matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
-from MultiAgentsSim.base import Simulation, SimState
+from simulationsandbox.base import Simulation, SimState
 
 N_DIMS = 2
 
@@ -39,6 +37,7 @@ class SimpleSimulation(Simulation):
                               colors=jnp.full(shape=(self.max_agents, 3), fill_value=jnp.array([1.0, 0.0, 0.0]))
                               )
     
+    # Could even be implemented in the step function because we do not have RL agents choosing actions
     @partial(jit, static_argnums=(0,))
     def choose_action(self, obs, key):
         return random.randint(key, shape=(obs.shape[0], N_DIMS), minval=-1, maxval=2)
@@ -65,7 +64,7 @@ class SimpleSimulation(Simulation):
         return self.grid_size, self.max_agents
 
     @staticmethod
-    def visualize_sim(state, grid_size=None):
+    def visualize_sim(state):
         if not plt.fignum_exists(1):
             plt.ion()
             plt.figure(figsize=(10, 10))

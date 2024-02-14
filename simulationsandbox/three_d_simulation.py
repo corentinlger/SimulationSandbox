@@ -6,7 +6,7 @@ from jax import random, jit
 from flax import struct
 import matplotlib.pyplot as plt
 
-from MultiAgentsSim.base import Simulation, SimState
+from simulationsandbox.base import Simulation, SimState
 
 N_DIMS = 3
 
@@ -14,6 +14,7 @@ N_DIMS = 3
 class ThreeDSimState(SimState):
     time: int
     grid: jnp.array
+    grid_size: int
     alive: jnp.array
     x_pos: jnp.array
     y_pos: jnp.array
@@ -32,6 +33,7 @@ class ThreeDSimulation(Simulation):
         x_key, y_key = random.split(key)
         return ThreeDSimState(time=0,
                         grid=jnp.zeros((self.grid_size, self.grid_size, self.grid_size), dtype=jnp.float32),
+                        grid_size=self.grid_size,
                         alive = jnp.hstack((jnp.ones(num_agents), jnp.zeros(self.max_agents - num_agents))),
                         x_pos=random.randint(key=x_key, shape=(self.max_agents,), minval=0, maxval=self.grid_size),
                         y_pos=random.randint(key=y_key, shape=(self.max_agents,), minval=0, maxval=self.grid_size),
@@ -68,7 +70,7 @@ class ThreeDSimulation(Simulation):
         return self.grid_size, self.max_agents
 
     @staticmethod
-    def visualize_sim(state, grid_size):
+    def visualize_sim(state):
         if not plt.fignum_exists(1):
             plt.ion()
             fig = plt.figure(figsize=(10, 10))
@@ -90,9 +92,9 @@ class ThreeDSimulation(Simulation):
         ax.set_ylabel("Y-axis")
         ax.set_zlabel("Z-axis")
 
-        ax.set_xlim(0, grid_size)
-        ax.set_ylim(0, grid_size)
-        ax.set_zlim(0, grid_size)
+        ax.set_xlim(0, state.grid_size)
+        ax.set_ylim(0, state.grid_size)
+        ax.set_zlim(0, state.grid_size)
 
         ax.legend()
 

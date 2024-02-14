@@ -4,8 +4,8 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from jax import random
 
-from MultiAgentsSim.two_d_simulation import SimpleSimulation
-from MultiAgentsSim.three_d_simulation import ThreeDSimulation
+from simulationsandbox.two_d_simulation import SimpleSimulation
+from simulationsandbox.three_d_simulation import ThreeDSimulation
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -33,7 +33,6 @@ def main(cfg: DictConfig):
 
     sim = Simulation(max_agents, grid_size)
     state = sim.init_state(num_agents, num_obs, key)
-
 
     # Launch a simulation
     print("Simulation started")

@@ -4,8 +4,8 @@ import jax
 import jax.numpy as jnp
 from jax import random
 
-from MultiAgentsSim.two_d_simulation import SimpleSimulation
-from MultiAgentsSim.three_d_simulation import ThreeDSimulation
+from simulationsandbox.two_d_simulation import SimpleSimulation
+from simulationsandbox.three_d_simulation import ThreeDSimulation
 
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
@@ -95,6 +95,7 @@ def test_three_d_simulation_run():
             state = state.replace(colors=state.colors.at[0, 2].set(1.0))
 
         if timestep == 40:
+            
             state = sim.remove_agent(state, 2)
             state = sim.remove_agent(state, 1)
             state = sim.remove_agent(state, 4)
@@ -104,6 +105,6 @@ def test_three_d_simulation_run():
         state = sim.step(state, actions, step_key)
 
         if VIZUALIZE:
-            ThreeDSimulation.visualize_sim(state, grid_size=GRID_SIZE)
+            ThreeDSimulation.visualize_sim(state)
     print("\nSimulation ended")
 
