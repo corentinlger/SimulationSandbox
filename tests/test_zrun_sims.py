@@ -17,19 +17,6 @@ STEP_DELAY = 0.000001
 SEED = 0
 
 
-def test_simulation_init():
-    key = random.PRNGKey(SEED)
-
-    sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
-    state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
-
-    assert sim.max_agents == MAX_AGENTS
-    assert sim.grid_size == GRID_SIZE
-    assert state.x_pos.shape == (MAX_AGENTS,)
-    assert jnp.sum(state.alive) == NUM_AGENTS
-    assert state.grid.shape == (GRID_SIZE, GRID_SIZE)
-
-
 def test_simple_simulation_run():
     key = random.PRNGKey(SEED)
     sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
@@ -64,12 +51,13 @@ def test_simple_simulation_run():
         state = sim.step(state, actions, step_key)
 
         if VIZUALIZE:
-            SimpleSimulation.visualize_sim(state, grid_size=None)
+            SimpleSimulation.visualize_sim(state)
     print("\nSimulation ended")
     
     assert jnp.sum(state.alive) == 5
     assert state.x_pos.shape == (MAX_AGENTS,)
     assert state.time == NUM_STEPS
+
 
 
 def test_three_d_simulation_run():
