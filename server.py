@@ -7,8 +7,9 @@ import argparse
 from jax import random
 from flax import serialization
 
-from MultiAgentsSim.utils.network import SERVER
-from MultiAgentsSim.sim_types import SIMULATIONS
+from simulationsandbox.wrapper import SimulationWrapper
+from simulationsandbox.utils.network import SERVER
+from simulationsandbox.sim_types import SIMULATIONS
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sim_type', type=str, default="two_d")
@@ -28,7 +29,6 @@ NUM_AGENTS = 5
 MAX_AGENTS = 10
 NUM_OBS = 3 
 GRID_SIZE = 20 
-VIZUALIZE = True
 
 # Initialize server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,37 +44,21 @@ sim = Simulation(MAX_AGENTS, GRID_SIZE)
 state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
 state_byte_size = len(serialization.to_bytes(state))
 
-# TODO : Rethink the code to delete the latest data var and only use state 
+
 # Shared variables and locks
-latest_data = state
-data_lock = threading.Lock()
-state_lock = threading.Lock()
-new_data_event = threading.Event()
+sim_lock = threading.Lock()
+update_event = threading.Event()
 
-print(f"{len(pickle.dumps(latest_data))}")
 
-# Continuously update the state of the simulation
-def update_latest_data():
-    global latest_data
-    global state
-    global key
-
-    while True:
-        with state_lock:
-            key, a_key, step_key = random.split(key, 3)
-            actions = sim.choose_action(state.obs, a_key)
-            state = sim.step(state, actions, step_key)
-            with data_lock:
-                latest_data = state
-            new_data_event.set()
-        time.sleep(STEP_DELAY)
+simulation = SimulationWrapper(sim, state, key, step_delay=STEP_DELAY, update_event=update_event)
+print(f"{len(pickle.dumps(simulation.state))}")
 
 
 # Establish a connection with a client
 def establish_connection(client, addr):
     try:
         client.send(SIM_TYPE.encode())
-        client.send(pickle.dumps(latest_data))
+        client.send(pickle.dumps(simulation.state))
         connection_type = client.recv(DATA_SIZE).decode()
         print(f"{connection_type} connection established with {addr}")
         return connection_type
@@ -92,10 +76,10 @@ def communicate_with_client(client, addr, connection_type):
     if connection_type == "RECEIVE":
             while True:
                 try:
-                    new_data_event.wait()
-                    with data_lock:
-                        client.send(serialization.to_bytes(latest_data))   
-                    new_data_event.clear()
+                    update_event.wait()
+                    # with data_lock:
+                    client.send(serialization.to_bytes(simulation.state))   
+                    update_event.clear()
 
                 except socket.error as e:
                     print(f"error: {e}")
@@ -113,15 +97,14 @@ def communicate_with_client(client, addr, connection_type):
                         print(f"Client {addr} disconnected")
 
                     elif request == "GET_STATE":
-                        with data_lock:
-                            client.send(serialization.to_bytes(latest_data))   
+                        with sim_lock:
+                            client.send(serialization.to_bytes(simulation.state))   
 
                     elif request == "SET_STATE":
-                        with data_lock:
-                            client.send(serialization.to_bytes(latest_data))  
+                        with sim_lock:
+                            client.send(serialization.to_bytes(simulation.state))  
                             updated_state = serialization.from_bytes(state, client.recv(state_byte_size))  
-                            with state_lock:
-                                state = updated_state
+                            simulation.state = updated_state
                     
                     else:
                         print(f"Unknow request type {request}")
@@ -142,10 +125,9 @@ def handle_client(client, addr):
     communicate_with_client(client, addr, connection_type)
 
 
-# Create a thread to continuously update the data
-update_data_thread = threading.Thread(target=update_latest_data)
-update_data_thread.start()
-
+# Start the simulation
+simulation.start()
+print("Simulation started")
 
 # Start listening to clients and launch their threads 
 while True:

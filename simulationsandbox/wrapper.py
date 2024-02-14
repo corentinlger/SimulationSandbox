@@ -5,14 +5,14 @@ from jax import random
 
 class SimulationWrapper:
 
-    def __init__(self, simulation, state, key, step_delay=0.1, print_data=False):
+    def __init__(self, simulation, state, key, step_delay=0.1, update_event=None, print_data=False):
         self.running = False
         self.paused = False
         self.stop_requested = False
         self.update_thread = None
         self.print_data = print_data
         self.step_delay = step_delay
-        # simulation_dependent
+        self.update_event = update_event
         self.simulation = simulation
         self.state = state
         self.key = key
@@ -40,6 +40,10 @@ class SimulationWrapper:
                 continue
 
             self.state = self._update_simulation()
+
+            if self.update_event:
+                self.update_event.set()
+
             if self.print_data:
                 print(f"{self.state = }")
 

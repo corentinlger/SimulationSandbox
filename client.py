@@ -4,9 +4,10 @@ import pickle
 
 from flax import serialization
 
-from MultiAgentsSim.two_d_simulation import SimpleSimulation
-from MultiAgentsSim.utils.network import SERVER
-from MultiAgentsSim.sim_types import SIMULATIONS
+from simulationsandbox.two_d_simulation import SimpleSimulation
+from simulationsandbox.utils.network import SERVER
+from simulationsandbox.sim_types import SIMULATIONS
+
 
 PORT = 5050
 ADDR = (SERVER, PORT)
@@ -35,7 +36,7 @@ def receive_loop():
             i += 1 
             raw_data = client.recv(state_bytes_size)
             state = serialization.from_bytes(state_example, raw_data)
-            Simulation.visualize_sim(state, grid_size=GRID_SIZE)
+            Simulation.visualize_sim(state)
         
         except socket.error as e:
             print(e)
@@ -50,7 +51,7 @@ def test():
         i += 1 
         raw_data = client.recv(state_bytes_size)
         state = serialization.from_bytes(state_example, raw_data)
-        Simulation.visualize_sim(state, grid_size=GRID_SIZE)
+        Simulation.visualize_sim(state)
     client.close()
 
     print(f"{i = } : {i / EVAL_TIME } data received per second")
