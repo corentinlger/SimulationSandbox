@@ -9,7 +9,7 @@ from flax import serialization
 
 from simulationsandbox.wrapper import SimulationWrapper
 from simulationsandbox.utils.network import SERVER
-from simulationsandbox.sim_types import SIMULATIONS
+from simulationsandbox.utils.sim_types import SIMULATIONS
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sim_type', type=str, default="two_d")
@@ -29,6 +29,7 @@ NUM_AGENTS = 5
 MAX_AGENTS = 10
 NUM_OBS = 3 
 GRID_SIZE = 20 
+PRINT_DATA = False
 
 # Initialize server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,7 +51,7 @@ sim_lock = threading.Lock()
 update_event = threading.Event()
 
 
-simulation = SimulationWrapper(sim, state, key, step_delay=STEP_DELAY, update_event=update_event)
+simulation = SimulationWrapper(sim, state, key, step_delay=STEP_DELAY, update_event=update_event, print_data=PRINT_DATA)
 print(f"{len(pickle.dumps(simulation.state))}")
 
 
@@ -102,10 +103,32 @@ def communicate_with_client(client, addr, connection_type):
 
                     elif request == "SET_STATE":
                         with sim_lock:
+                            simulation.pause()
                             client.send(serialization.to_bytes(simulation.state))  
                             updated_state = serialization.from_bytes(state, client.recv(state_byte_size))  
                             simulation.state = updated_state
+                            simulation.resume()
+
+                    elif request == "PAUSE":
+                        with sim_lock:
+                            simulation.pause()
+                        print("Simulation paused")
                     
+                    elif request == "RESUME":
+                        with sim_lock:
+                            simulation.resume()
+                        print("Simulation resumed")
+
+                    elif request == "STOP":
+                        with sim_lock:
+                            simulation.stop()
+                        print("Simulation stopped")
+
+                    elif request == "START":
+                        with sim_lock:
+                            simulation.start()
+                        print("Simulation started")
+
                     else:
                         print(f"Unknow request type {request}")
 

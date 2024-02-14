@@ -6,7 +6,7 @@ from flax import serialization
 
 from simulationsandbox.two_d_simulation import SimpleSimulation
 from simulationsandbox.utils.network import SERVER
-from simulationsandbox.sim_types import SIMULATIONS
+from simulationsandbox.utils.sim_types import SIMULATIONS
 
 
 PORT = 5050
