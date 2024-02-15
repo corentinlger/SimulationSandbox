@@ -13,7 +13,7 @@ N_DIMS = 3
 @struct.dataclass
 class ThreeDSimState(SimState):
     time: int
-    grid: jnp.array
+    # grid: jnp.array
     grid_size: int
     alive: jnp.array
     x_pos: jnp.array
@@ -32,7 +32,7 @@ class ThreeDSimulation(Simulation):
     def init_state(self, num_agents, num_obs, key):
         x_key, y_key = random.split(key)
         return ThreeDSimState(time=0,
-                        grid=jnp.zeros((self.grid_size, self.grid_size, self.grid_size), dtype=jnp.float32),
+                        # grid=jnp.zeros((self.grid_size, self.grid_size, self.grid_size), dtype=jnp.float32),
                         grid_size=self.grid_size,
                         alive = jnp.hstack((jnp.ones(num_agents), jnp.zeros(self.max_agents - num_agents))),
                         x_pos=random.randint(key=x_key, shape=(self.max_agents,), minval=0, maxval=self.grid_size),
@@ -44,7 +44,7 @@ class ThreeDSimulation(Simulation):
 
     @partial(jit, static_argnums=(0,))
     def choose_action(self, obs, key):
-        return random.randint(key, shape=(obs.shape[0], N_DIMS), minval=-1, maxval=2)
+        return random.randint(key, shape=(obs.shape[0], N_DIMS), minval=-1, maxval=2) / 5
     
     @partial(jit, static_argnums=(0,))
     def step(self, sim_state, actions, key):

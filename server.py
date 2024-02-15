@@ -43,7 +43,6 @@ Simulation = SIMULATIONS[SIM_TYPE]
 key = random.PRNGKey(SEED)
 sim = Simulation(MAX_AGENTS, GRID_SIZE)
 state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
-state_byte_size = len(serialization.to_bytes(state))
 
 
 # Shared variables and locks
@@ -52,7 +51,7 @@ update_event = threading.Event()
 
 
 simulation = SimulationWrapper(sim, state, key, step_delay=STEP_DELAY, update_event=update_event, print_data=PRINT_DATA)
-print(f"{len(pickle.dumps(simulation.state))}")
+state_byte_size = len(serialization.to_bytes(simulation.state))
 
 
 # Establish a connection with a client
@@ -78,8 +77,9 @@ def communicate_with_client(client, addr, connection_type):
             while True:
                 try:
                     update_event.wait()
-                    # with data_lock:
-                    client.send(serialization.to_bytes(simulation.state))   
+                    with sim_lock:
+                        # sent_bytes_state = serialization.to_bytes(simulation.state)
+                        client.send(serialization.to_bytes(simulation.state))  
                     update_event.clear()
 
                 except socket.error as e:
@@ -102,12 +102,17 @@ def communicate_with_client(client, addr, connection_type):
                             client.send(serialization.to_bytes(simulation.state))   
 
                     elif request == "SET_STATE":
+                        # sent_bytes_state = serialization.to_bytes(simulation.state)
+                        client.send(serialization.to_bytes(simulation.state))  
+                        # bytes_state = client.recv(state_byte_size)
+                        updated_state = serialization.from_bytes(state, client.recv(state_byte_size))
                         with sim_lock:
-                            simulation.pause()
-                            client.send(serialization.to_bytes(simulation.state))  
-                            updated_state = serialization.from_bytes(state, client.recv(state_byte_size))  
-                            simulation.state = updated_state
-                            simulation.resume()
+                            if not simulation.paused:
+                                simulation.pause()
+                                simulation.state = updated_state
+                                simulation.resume()
+                            else:
+                                simulation.state = updated_state
 
                     elif request == "PAUSE":
                         with sim_lock:
@@ -128,6 +133,11 @@ def communicate_with_client(client, addr, connection_type):
                         with sim_lock:
                             simulation.start()
                         print("Simulation started")
+                    
+                    # elif request.startswith("ADD_AGENT"):
+                    #     _, agent_idx = request.split(",")
+                    #     with sim_lock:
+                    #     simulation.state = simulation
 
                     else:
                         print(f"Unknow request type {request}")
@@ -151,6 +161,11 @@ def handle_client(client, addr):
 # Start the simulation
 simulation.start()
 print("Simulation started")
+# Idk why but need to wait for simulation to start before getting state size in bytes
+time.sleep(1)
+with sim_lock:
+    state_byte_size = len(serialization.to_bytes(simulation.state))
+    print(f"{state_byte_size = }")
 
 # Start listening to clients and launch their threads 
 while True:

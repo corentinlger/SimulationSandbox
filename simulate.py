@@ -62,7 +62,7 @@ def main(cfg: DictConfig):
         state = sim.step(state, actions, step_key)
 
         if visualize:
-            Simulation.visualize_sim(state, grid_size)
+            Simulation.visualize_sim(state)
     print("\nSimulation ended")
 
 if __name__ == "__main__":
