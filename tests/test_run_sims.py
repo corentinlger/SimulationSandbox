@@ -1,8 +1,8 @@
 import time 
 
-import jax
 import jax.numpy as jnp
 from jax import random
+import matplotlib.pyplot as plt 
 
 from simulationsandbox.two_d_simulation import SimpleSimulation
 from simulationsandbox.three_d_simulation import ThreeDSimulation
@@ -53,7 +53,7 @@ def test_simple_simulation_run():
         if VIZUALIZE:
             SimpleSimulation.visualize_sim(state)
     print("\nSimulation ended")
-    
+
     assert jnp.sum(state.alive) == 5
     assert state.x_pos.shape == (MAX_AGENTS,)
     assert state.time == NUM_STEPS
@@ -94,5 +94,8 @@ def test_three_d_simulation_run():
 
         if VIZUALIZE:
             ThreeDSimulation.visualize_sim(state)
+
+    plt.close()
     print("\nSimulation ended")
+
 

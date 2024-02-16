@@ -29,7 +29,7 @@ NUM_AGENTS = 5
 MAX_AGENTS = 10
 NUM_OBS = 3 
 GRID_SIZE = 20 
-PRINT_DATA = False
+PRINT_DATA = True
 
 # Initialize server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -58,7 +58,8 @@ state_byte_size = len(serialization.to_bytes(simulation.state))
 def establish_connection(client, addr):
     try:
         client.send(SIM_TYPE.encode())
-        client.send(pickle.dumps(simulation.state))
+        with sim_lock:
+            client.send(pickle.dumps(simulation.state))
         connection_type = client.recv(DATA_SIZE).decode()
         print(f"{connection_type} connection established with {addr}")
         return connection_type

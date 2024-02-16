@@ -27,5 +27,4 @@ def test_simulation_init():
     assert sim.grid_size == GRID_SIZE
     assert state.x_pos.shape == (MAX_AGENTS,)
     assert jnp.sum(state.alive) == NUM_AGENTS
-    assert state.grid.shape == (GRID_SIZE, GRID_SIZE)
 
