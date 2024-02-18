@@ -3,9 +3,9 @@ import argparse
 
 from jax import random
 
-from simulationsandbox.two_d_simulation import SimpleSimulation
-from simulationsandbox.three_d_simulation import ThreeDSimulation
-
+from simulationsandbox.environments.two_d_example_env import TwoDEnv
+from simulationsandbox.environments.three_d_example_env import ThreeDEnv
+from simulationsandbox.utils.sim_types import SIMULATIONS
 
 def main():
     parser = argparse.ArgumentParser()
@@ -22,12 +22,9 @@ def main():
 
     key = random.PRNGKey(args.random_seed)
 
-    # Choose a simulation type
-    if args.sim_type == "two_d":
-        Simulation = SimpleSimulation
-    elif args.sim_type == "three_d":
-        Simulation = ThreeDSimulation
-    else:
+    try:
+        Simulation = SIMULATIONS[args.sim_type]
+    except:
         raise(ValueError(f"Unknown sim type {args.sim_type}"))
 
     sim = Simulation(args.max_agents, args.grid_size)

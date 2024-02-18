@@ -4,7 +4,6 @@ import pickle
 
 from flax import serialization
 
-from simulationsandbox.two_d_simulation import SimpleSimulation
 from simulationsandbox.utils.network import SERVER
 from simulationsandbox.utils.sim_types import SIMULATIONS
 

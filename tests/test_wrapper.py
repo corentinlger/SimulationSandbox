@@ -4,9 +4,9 @@ import jax
 import jax.numpy as jnp
 from jax import random
 
-from simulationsandbox.two_d_simulation import SimpleSimulation
-from simulationsandbox.three_d_simulation import ThreeDSimulation
-from simulationsandbox.wrapper import SimulationWrapper
+from simulationsandbox.environments.two_d_example_env import TwoDEnv
+from simulationsandbox.environments.three_d_example_env import ThreeDEnv
+from simulationsandbox.simulator_wrapper import SimulationWrapper
 
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
@@ -22,7 +22,7 @@ SEED = 0
 
 def test_wrapper_two_d_sim(): 
     key = random.PRNGKey(SEED)
-    env = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
+    env = TwoDEnv(MAX_AGENTS, GRID_SIZE)
     state = env.init_state(NUM_AGENTS, NUM_OBS, key)
 
     # Example usage:

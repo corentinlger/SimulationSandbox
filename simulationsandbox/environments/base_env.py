@@ -5,16 +5,16 @@ from flax import struct
 
 
 @struct.dataclass
-class SimState:
+class BaseEnvState:
     time: int
    
    
-class Simulation:
+class BaseEnv:
     def __init__(self):
         raise(NotImplementedError)
     
     @partial(jit, static_argnums=(0, 1, 2))
-    def init_state(self) -> SimState:
+    def init_state(self) -> BaseEnvState:
         raise(NotImplementedError)
     
     # Should be moved in another class
@@ -24,7 +24,7 @@ class Simulation:
     
     # Should also return new obs for agents
     @partial(jit, static_argnums=(0,))
-    def step(self, state: SimState, actions, key) -> SimState:
+    def step(self, state: BaseEnvState, actions, key) -> BaseEnvState:
         raise(NotImplementedError)
     
     def get_env_params(self):

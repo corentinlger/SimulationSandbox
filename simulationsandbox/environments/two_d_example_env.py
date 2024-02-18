@@ -5,14 +5,13 @@ from jax import random, jit
 from flax import struct
 import matplotlib.pyplot as plt
 
-from simulationsandbox.base import Simulation, SimState
+from simulationsandbox.environments.base_env import BaseEnv, BaseEnvState
 
 N_DIMS = 2
 
 @struct.dataclass
-class SimpleSimState(SimState):
+class TwoDState(BaseEnvState):
     time: int
-    # grid: jnp.array
     grid_size: int
     alive: jnp.array
     x_pos: jnp.array
@@ -21,7 +20,7 @@ class SimpleSimState(SimState):
     colors: jnp.array
 
 
-class SimpleSimulation(Simulation):
+class TwoDEnv(BaseEnv):
     def __init__(self, max_agents, grid_size):
         self.max_agents = max_agents
         self.grid_size = grid_size
@@ -29,7 +28,7 @@ class SimpleSimulation(Simulation):
     @partial(jit, static_argnums=(0, 1, 2))
     def init_state(self, num_agents, num_obs, key):
         x_key, y_key = random.split(key)
-        return SimpleSimState(time=0,
+        return TwoDState(time=0,
                               grid_size=self.grid_size,
                             #   grid=jnp.zeros((self.grid_size, self.grid_size), dtype=jnp.float32),
                               alive=jnp.hstack((jnp.ones(num_agents), jnp.zeros(self.max_agents - num_agents))),

@@ -1,5 +1,6 @@
-from simulationsandbox.two_d_simulation import SimpleSimulation
-from simulationsandbox.three_d_simulation import ThreeDSimulation
+from simulationsandbox.environments.two_d_example_env import TwoDEnv
+from simulationsandbox.environments.three_d_example_env import ThreeDEnv
 
-SIMULATIONS = {"two_d": SimpleSimulation,
-             "three_d": ThreeDSimulation}
+SIMULATIONS = {"two_d": TwoDEnv,
+               "three_d": ThreeDEnv
+               }

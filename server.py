@@ -7,13 +7,14 @@ import argparse
 from jax import random
 from flax import serialization
 
-from simulationsandbox.wrapper import SimulationWrapper
+from simulationsandbox.simulator_wrapper import SimulationWrapper
 from simulationsandbox.utils.network import SERVER
 from simulationsandbox.utils.sim_types import SIMULATIONS
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sim_type', type=str, default="two_d")
 parser.add_argument('--step_delay', type=float, default=0.1)
+parser.add_argument('--print_data', action="store_true")
 args = parser.parse_args()
 
 
@@ -21,15 +22,17 @@ args = parser.parse_args()
 PORT = 5050
 ADDR = (SERVER, PORT)
 DATA_SIZE = 40000
-STEP_DELAY = args.step_delay
 # Simulation constants
-SIM_TYPE = args.sim_type
 SEED = 0
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
 NUM_OBS = 3 
-GRID_SIZE = 20 
-PRINT_DATA = True
+GRID_SIZE = 20
+
+# SImulation variables
+sim_type = args.sim_type
+step_delay = args.step_delay
+print_data = args.print_data
 
 # Initialize server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,7 +42,7 @@ print(f"Server started and listening ...")
 
 
 # Initialize simulation
-Simulation = SIMULATIONS[SIM_TYPE]
+Simulation = SIMULATIONS[sim_type]
 key = random.PRNGKey(SEED)
 sim = Simulation(MAX_AGENTS, GRID_SIZE)
 state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
@@ -50,14 +53,14 @@ sim_lock = threading.Lock()
 update_event = threading.Event()
 
 
-simulation = SimulationWrapper(sim, state, key, step_delay=STEP_DELAY, update_event=update_event, print_data=PRINT_DATA)
+simulation = SimulationWrapper(sim, state, key, step_delay=step_delay, update_event=update_event, print_data=print_data)
 state_byte_size = len(serialization.to_bytes(simulation.state))
 
 
 # Establish a connection with a client
 def establish_connection(client, addr):
     try:
-        client.send(SIM_TYPE.encode())
+        client.send(sim_type.encode())
         with sim_lock:
             client.send(pickle.dumps(simulation.state))
         connection_type = client.recv(DATA_SIZE).decode()
@@ -135,6 +138,7 @@ def communicate_with_client(client, addr, connection_type):
                             simulation.start()
                         print("Simulation started")
                     
+                    # TODO : enable adding and removing agents
                     # elif request.startswith("ADD_AGENT"):
                     #     _, agent_idx = request.split(",")
                     #     with sim_lock:

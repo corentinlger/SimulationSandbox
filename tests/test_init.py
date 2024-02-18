@@ -4,8 +4,8 @@ import jax
 import jax.numpy as jnp
 from jax import random
 
-from simulationsandbox.two_d_simulation import SimpleSimulation
-from simulationsandbox.three_d_simulation import ThreeDSimulation
+from simulationsandbox.environments.two_d_example_env import TwoDEnv
+from simulationsandbox.environments.three_d_example_env import ThreeDEnv
 
 NUM_AGENTS = 5 
 MAX_AGENTS = 10
@@ -20,7 +20,7 @@ SEED = 0
 def test_simulation_init():
     key = random.PRNGKey(SEED)
 
-    sim = SimpleSimulation(MAX_AGENTS, GRID_SIZE)
+    sim = TwoDEnv(MAX_AGENTS, GRID_SIZE)
     state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
 
     assert sim.max_agents == MAX_AGENTS

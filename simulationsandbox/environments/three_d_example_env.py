@@ -6,14 +6,13 @@ from jax import random, jit
 from flax import struct
 import matplotlib.pyplot as plt
 
-from simulationsandbox.base import Simulation, SimState
+from simulationsandbox.environments.base_env import BaseEnv, BaseEnvState
 
 N_DIMS = 3
 
 @struct.dataclass
-class ThreeDSimState(SimState):
+class ThreeDState(BaseEnvState):
     time: int
-    # grid: jnp.array
     grid_size: int
     alive: jnp.array
     x_pos: jnp.array
@@ -23,7 +22,7 @@ class ThreeDSimState(SimState):
     colors: jnp.array
 
 
-class ThreeDSimulation(Simulation):
+class ThreeDEnv(BaseEnv):
     def __init__(self, max_agents, grid_size):
         self.max_agents = max_agents
         self.grid_size = grid_size
@@ -31,7 +30,7 @@ class ThreeDSimulation(Simulation):
     @partial(jit, static_argnums=(0, 1, 2))
     def init_state(self, num_agents, num_obs, key):
         x_key, y_key = random.split(key)
-        return ThreeDSimState(time=0,
+        return ThreeDState(time=0,
                         # grid=jnp.zeros((self.grid_size, self.grid_size, self.grid_size), dtype=jnp.float32),
                         grid_size=self.grid_size,
                         alive = jnp.hstack((jnp.ones(num_agents), jnp.zeros(self.max_agents - num_agents))),
