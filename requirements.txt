@@ -2,7 +2,7 @@ absl-py==2.1.0
 antlr4-python3-runtime==4.9.3
 asttokens==2.4.1
 bidict==0.22.1
-black==23.12.1
+black==24.3.0
 bleach==6.1.0
 blinker==1.7.0
 bokeh==3.3.4
