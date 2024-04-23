@@ -27,15 +27,6 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Reformat with black 
-      run: |
-        black . --diff --color 
-        black .
-
     - name: Test with pytest
       run: |
         pytest
-
-    - name: Prevent push on test failure
-      if: failure()
-      run: exit 1
