@@ -1,8 +1,8 @@
 TODO.md 
 outputs 
 myvenv
+venv/
 __pycache__/
 random/
 test.ipynb
 test.py
-activate_venv.sh
