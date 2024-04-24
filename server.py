@@ -9,10 +9,10 @@ from flax import serialization
 
 from simulationsandbox.simulator_wrapper import SimulationWrapper
 from simulationsandbox.utils.network import SERVER
-from simulationsandbox.utils.sim_types import SIMULATIONS
+from simulationsandbox.utils.envs import ENVS
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--sim_type', type=str, default="two_d")
+parser.add_argument('--env', type=str, default="two_d")
 parser.add_argument('--step_delay', type=float, default=0.1)
 parser.add_argument('--print_data', action="store_true")
 args = parser.parse_args()
@@ -30,7 +30,7 @@ NUM_OBS = 3
 GRID_SIZE = 20
 
 # SImulation variables
-sim_type = args.sim_type
+env = args.env
 step_delay = args.step_delay
 print_data = args.print_data
 
@@ -38,11 +38,11 @@ print_data = args.print_data
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 server.listen()
-print(f"Server started and listening ...")
+print("Server started and listening ...")
 
 
 # Initialize simulation
-Simulation = SIMULATIONS[sim_type]
+Simulation = ENVS[env]
 key = random.PRNGKey(SEED)
 sim = Simulation(MAX_AGENTS, GRID_SIZE)
 state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
@@ -60,7 +60,7 @@ state_byte_size = len(serialization.to_bytes(simulation.state))
 # Establish a connection with a client
 def establish_connection(client, addr):
     try:
-        client.send(sim_type.encode())
+        client.send(env.encode())
         with sim_lock:
             client.send(pickle.dumps(simulation.state))
         connection_type = client.recv(DATA_SIZE).decode()
