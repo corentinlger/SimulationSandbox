@@ -1,3 +1,4 @@
+# TODO : Créer un aquarium env en jax
 # TODO : Ensure the agents do not spawn in the lake 
 # TODO : Change the init of lake 
 # TODO : Add more elements to the environment
@@ -14,11 +15,14 @@ import matplotlib.pyplot as plt
 from simulationsandbox.environments.base_env import BaseEnv, BaseEnvState
 
 N_DIMS = 2
-
+GROUND_SPEED = .1
+LAKE_SPEED = .05
 
 @struct.dataclass
 class Agents:
     pos: jnp.array
+    speed: jnp.array
+    theta: jnp.array
     alive: jnp.array
     color: jnp.array
     obs: jnp.array
@@ -32,10 +36,17 @@ class LakeEnvState(BaseEnvState):
     agents: Agents
 
 
-def move(obs, key):
-    return random.randint(key, shape=(N_DIMS,), minval=-1, maxval=2) / 10
+def normal(theta):
+    return jnp.array([jnp.cos(theta), jnp.sin(theta)])
 
-move = jit(vmap(move, in_axes=(0, 0)))
+normal = jit(vmap(normal))
+
+
+# Change the angle of the agent a bit 
+def turn(obs, key):
+    return random.normal(key, shape=()) / 10 
+
+turn = jit(vmap(turn, in_axes=(0, 0)))
 
 
 def is_point_in_lake(agent_pos, lake_coordinates):
@@ -65,10 +76,12 @@ class LakeEnv(BaseEnv):
         self.grid_size = grid_size
 
     def init_state(self, num_agents, num_obs, key):
-        agents_key, lake_key = random.split(key)
+        agents_key_pos, agents_key_theta, lake_key = random.split(key, 3)
 
         agents = Agents(
-            pos=random.randint(key=agents_key, shape=(self.max_agents, 2), minval=0, maxval=self.grid_size),
+            pos=random.uniform(key=agents_key_pos, shape=(self.max_agents, 2), minval=0, maxval=self.grid_size),
+            speed=jnp.full(shape=(self.max_agents,), fill_value=GROUND_SPEED),
+            theta=random.uniform(key=agents_key_theta, shape=(self.max_agents,), minval=0, maxval=2*jnp.pi),
             alive=jnp.hstack((jnp.ones(num_agents), jnp.zeros(self.max_agents - num_agents))),
             color=jnp.full(shape=(self.max_agents, 3), fill_value=jnp.array([1.0, 0.0, 0.0])),
             obs=jnp.zeros((self.max_agents, num_obs))
@@ -92,19 +105,19 @@ class LakeEnv(BaseEnv):
 
     @partial(jit, static_argnums=(0,))
     def step(self, state, key):
+        in_lake = is_point_in_lake(state.agents.pos, state.lake_pos)
+        speeds = jnp.where(in_lake, LAKE_SPEED, GROUND_SPEED)
         keys = random.split(key, self.max_agents)
         # Compute the next move of agents
-        actions = move(state.agents.obs, keys)
-        next_positions = state.agents.pos + actions
+        actions = turn(state.agents.obs, keys)
+        theta = state.agents.theta + actions
+        n = normal(theta)
+        next_positions = state.agents.pos + (n * jnp.stack((speeds, speeds), axis=1))
         # Keep agents in the grid
         agents_pos = jnp.clip(next_positions, 0, self.grid_size - 1)
-        # Keep agents outside the lake
-        move_in_lake = is_point_in_lake(next_positions, state.lake_pos)
-        move_in_lake = jnp.stack((move_in_lake, move_in_lake), axis=1)
-        agents_pos = jnp.where(move_in_lake, agents_pos, next_positions)
         # Update new state
         time = state.time + 1
-        agents = state.agents.replace(pos=agents_pos)
+        agents = state.agents.replace(pos=agents_pos, speed=speeds, theta=theta)
         state = state.replace(time=time, agents=agents)
         return state
     
@@ -150,4 +163,4 @@ class LakeEnv(BaseEnv):
         plt.ylim(0, state.grid_size)
 
         plt.draw()
-        plt.pause(0.0001)
+        plt.pause(0.00001)

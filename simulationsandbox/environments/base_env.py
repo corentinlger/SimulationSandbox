@@ -13,7 +13,7 @@ class BaseEnv:
     def __init__(self):
         raise(NotImplementedError)
     
-    @partial(jit, static_argnums=(0, 1, 2))
+    @partial(jit, static_argnums=(0,))
     def init_state(self) -> BaseEnvState:
         raise(NotImplementedError)
     
