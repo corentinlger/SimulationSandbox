@@ -112,9 +112,12 @@ class LakeEnv(BaseEnv):
         actions = turn(state.agents.obs, keys)
         theta = state.agents.theta + actions
         n = normal(theta)
-        next_positions = state.agents.pos + (n * jnp.stack((speeds, speeds), axis=1))
-        # Keep agents in the grid
-        agents_pos = jnp.clip(next_positions, 0, self.grid_size - 1)
+        agents_pos = state.agents.pos + (n * jnp.stack((speeds, speeds), axis=1))
+        # Collide with walls
+        theta = jnp.where(agents_pos[:, 0] < 0, theta - jnp.pi, theta)
+        theta = jnp.where(agents_pos[:, 0] > self.grid_size, theta - jnp.pi, theta)
+        theta = jnp.where(agents_pos[:, 1] < 0, theta - jnp.pi, theta)
+        theta = jnp.where(agents_pos[:, 1] > self.grid_size, theta - jnp.pi, theta)
         # Update new state
         time = state.time + 1
         agents = state.agents.replace(pos=agents_pos, speed=speeds, theta=theta)
