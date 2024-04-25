@@ -5,7 +5,7 @@ import pickle
 from flax import serialization
 
 from simulationsandbox.utils.network import SERVER
-from simulationsandbox.utils.sim_types import SIMULATIONS
+from simulationsandbox.utils.envs import SIMULATIONS
 
 
 PORT = 5050
