@@ -1,9 +1,4 @@
-# TODO : Créer un aquarium env en jax
-# TODO : Ensure the agents do not spawn in the lake 
-# TODO : Change the init of lake 
 # TODO : Add more elements to the environment
-# TODO : Maybe test particle based with different speeds on earth / lake
-
 
 from functools import partial
 
@@ -26,6 +21,10 @@ class Agents:
     alive: jnp.array
     color: jnp.array
     obs: jnp.array
+
+
+class Object:
+    pos: jnp.array
 
 
 @struct.dataclass
@@ -135,7 +134,7 @@ class LakeEnv(BaseEnv):
         return state
 
     @staticmethod
-    def visualize_sim(state):
+    def render(state):
         if not plt.fignum_exists(1):
             plt.ion()
             plt.figure(figsize=(10, 10))

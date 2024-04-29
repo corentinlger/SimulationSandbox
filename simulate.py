@@ -40,7 +40,7 @@ def main():
         state = sim.step(state, step_key)
 
         if args.visualize:
-            Simulation.visualize_sim(state)
+            Simulation.render(state)
     print("\nSimulation ended")
 
 if __name__ == "__main__":

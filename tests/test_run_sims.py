@@ -51,7 +51,7 @@ def test_simple_simulation_run():
         state = sim.step(state, actions, step_key)
 
         if VIZUALIZE:
-            TwoDEnv.visualize_sim(state)
+            TwoDEnv.render(state)
     print("\nSimulation ended")
 
     assert jnp.sum(state.alive) == 5
@@ -93,7 +93,7 @@ def test_three_d_simulation_run():
         state = sim.step(state, actions, step_key)
 
         if VIZUALIZE:
-            ThreeDEnv.visualize_sim(state)
+            ThreeDEnv.render(state)
 
     plt.close()
     print("\nSimulation ended")

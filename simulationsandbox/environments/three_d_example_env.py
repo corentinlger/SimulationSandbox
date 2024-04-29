@@ -69,7 +69,7 @@ class ThreeDEnv(BaseEnv):
         return self.grid_size, self.max_agents
 
     @staticmethod
-    def visualize_sim(state):
+    def render(state):
         if not plt.fignum_exists(1):
             plt.ion()
             fig = plt.figure(figsize=(10, 10))

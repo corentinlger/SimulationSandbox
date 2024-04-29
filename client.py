@@ -35,7 +35,7 @@ def receive_loop():
             i += 1 
             raw_data = client.recv(state_bytes_size)
             state = serialization.from_bytes(state_example, raw_data)
-            Simulation.visualize_sim(state)
+            Simulation.render(state)
         
         except socket.error as e:
             print(e)
@@ -50,7 +50,7 @@ def test():
         i += 1 
         raw_data = client.recv(state_bytes_size)
         state = serialization.from_bytes(state_example, raw_data)
-        Simulation.visualize_sim(state)
+        Simulation.render(state)
     client.close()
 
     print(f"{i = } : {i / EVAL_TIME } data received per second")
