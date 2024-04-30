@@ -21,26 +21,29 @@ def main():
     key = random.PRNGKey(args.random_seed)
 
     try:
-        Simulation = ENVS[args.env]
+        Env = ENVS[args.env]
     except:
         raise(ValueError(f"Unknown environment {args.env}"))
+    # sim = Simulation(args.max_agents, args.grid_size)
+    # state = sim.init_state(args.num_agents, args.num_obs, key)
 
-    sim = Simulation(args.max_agents, args.grid_size)
-    state = sim.init_state(args.num_agents, args.num_obs, key)
+    env = Env()
+    state = env.init_state()
 
     # Launch a simulation
     print("Simulation started")
     for timestep in range(args.num_steps):
         time.sleep(args.step_delay)
-        key, a_key, step_key = random.split(key, 3)
+        key, step_key = random.split(key)
 
         if timestep % 10 == 0:
             print(f"\nstep {timestep}")
 
-        state = sim.step(state, step_key)
+        state = env.step(state, step_key)
 
         if args.visualize:
-            Simulation.render(state)
+            Env.render(state)
+
     print("\nSimulation ended")
 
 if __name__ == "__main__":
