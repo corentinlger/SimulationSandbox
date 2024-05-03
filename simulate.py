@@ -7,7 +7,7 @@ from simulationsandbox.utils.envs import ENVS
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env", type=str, default="two_d")
+    parser.add_argument("--env", type=str, default="aquarium")
     parser.add_argument("--num_steps", type=int, default=100)
     parser.add_argument("--num_agents", type=int, default=5)
     parser.add_argument("--max_agents", type=int, default=10)
