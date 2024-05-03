@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 ### Run a simulation locally
 
-You can run a simulation on your machine (using either the [2D](simulationsandbox/environments/two_d_example_env.py) or [3D](simulationsandbox/environments/three_d_example_env.py) example envs provided):
+You can run a simulation on your machine (using either the [2D](simulationsandbox/environments/lake_env.py) or [3D](simulationsandbox/environments/aquarium.py) example envs provided):
 
 ```bash
 python3 run_simulation.py  
