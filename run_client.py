@@ -5,7 +5,7 @@ import pickle
 from flax import serialization
 
 from simulationsandbox.utils.network import SERVER
-from simulationsandbox.utils.envs import SIMULATIONS
+from simulationsandbox.utils.envs import ENVS
 
 
 PORT = 5050
@@ -18,15 +18,14 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 print(f"Connected to {ADDR}")
 
-sim_type = client.recv(1024).decode()
+env_name = client.recv(1024).decode()
 state_example = pickle.loads(client.recv(DATA_SIZE))
 state_bytes_size = len(serialization.to_bytes(state_example))
 response = "RECEIVE"
 client.send(response.encode())
 time.sleep(1)
 
-Simulation = SIMULATIONS[sim_type]
-
+Env = ENVS[env_name]
 
 def receive_loop():
     i = 0 
@@ -35,7 +34,7 @@ def receive_loop():
             i += 1 
             raw_data = client.recv(state_bytes_size)
             state = serialization.from_bytes(state_example, raw_data)
-            Simulation.render(state)
+            Env.render(state)
         
         except socket.error as e:
             print(e)
@@ -50,10 +49,10 @@ def test():
         i += 1 
         raw_data = client.recv(state_bytes_size)
         state = serialization.from_bytes(state_example, raw_data)
-        Simulation.render(state)
+        Env.render(state)
     client.close()
 
     print(f"{i = } : {i / EVAL_TIME } data received per second")
 
-# test()
-receive_loop()
+if __name__ == "__main__":
+    receive_loop()

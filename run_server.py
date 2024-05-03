@@ -12,8 +12,9 @@ from simulationsandbox.utils.network import SERVER
 from simulationsandbox.utils.envs import ENVS
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env', type=str, default="two_d")
+parser.add_argument('--env', type=str, default="aquarium")
 parser.add_argument('--step_delay', type=float, default=0.1)
+parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--print_data', action="store_true")
 args = parser.parse_args()
 
@@ -30,7 +31,8 @@ NUM_OBS = 3
 GRID_SIZE = 20
 
 # SImulation variables
-env = args.env
+env_name = args.env
+seed = args.seed
 step_delay = args.step_delay
 print_data = args.print_data
 
@@ -42,10 +44,9 @@ print("Server started and listening ...")
 
 
 # Initialize simulation
-Simulation = ENVS[env]
-key = random.PRNGKey(SEED)
-sim = Simulation(MAX_AGENTS, GRID_SIZE)
-state = sim.init_state(NUM_AGENTS, NUM_OBS, key)
+Env = ENVS[env_name]
+env = Env(MAX_AGENTS, GRID_SIZE)
+state = env.init_state(NUM_AGENTS, NUM_OBS, seed)
 
 
 # Shared variables and locks
@@ -53,14 +54,14 @@ sim_lock = threading.Lock()
 update_event = threading.Event()
 
 
-simulation = SimulationWrapper(sim, state, key, step_delay=step_delay, update_event=update_event, print_data=print_data)
+simulation = SimulationWrapper(env, state, seed, step_delay=step_delay, update_event=update_event, print_data=print_data)
 state_byte_size = len(serialization.to_bytes(simulation.state))
 
 
 # Establish a connection with a client
 def establish_connection(client, addr):
     try:
-        client.send(env.encode())
+        client.send(env_name.encode())
         with sim_lock:
             client.send(pickle.dumps(simulation.state))
         connection_type = client.recv(DATA_SIZE).decode()
