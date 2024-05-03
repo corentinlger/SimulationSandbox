@@ -1,8 +1,7 @@
-TODO.md 
-outputs 
 myvenv
 venv/
+
 __pycache__/
-random/
+.pytest_cache/
+
 test.ipynb
-test.py

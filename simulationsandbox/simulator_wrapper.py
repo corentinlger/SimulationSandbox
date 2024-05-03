@@ -5,7 +5,7 @@ from jax import random
 
 class SimulationWrapper:
 
-    def __init__(self, simulation, state, key, step_delay=0.1, update_event=None, sim_lock=None, print_data=False):
+    def __init__(self, env, state, seed, step_delay=0.1, update_event=None, sim_lock=None, print_data=False):
         self.running = False
         self.paused = False
         self.stop_requested = False
@@ -14,9 +14,9 @@ class SimulationWrapper:
         self.step_delay = step_delay
         self.update_event = update_event
         # self.sim_lock = sim_lock
-        self.simulation = simulation
+        self.env = env
         self.state = state
-        self.key = key
+        self.key = random.PRNGKey(seed)
         
     def start(self):
         if not self.running:
@@ -40,7 +40,7 @@ class SimulationWrapper:
                 time.sleep(0.1)
                 continue
 
-            self.state = self._update_simulation()
+            self.state = self._update_env_state()
 
             if self.update_event:
                 self.update_event.set()
@@ -51,7 +51,6 @@ class SimulationWrapper:
 
             time.sleep(self.step_delay) 
 
-    def _update_simulation(self):
-        self.key, a_key, step_key = random.split(self.key, 3)
-        actions = self.simulation.choose_action(self.state.obs, a_key)
-        return self.simulation.step(self.state, actions, step_key)
+    def _update_env_state(self):
+        self.key, key = random.split(self.key)
+        return self.env.step(self.state, key)

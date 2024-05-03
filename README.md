@@ -21,25 +21,33 @@ pip install -r requirements.txt
 
 ## Usage 
 
-You can run a simulation on your machine (using either the [2D](simulationsandbox/environments/two_d_example_env.py) or [3D](simulationsandbox/environments/three_d_example_env.py) example envs provided):
+### Run a simulation locally
+
+You can run a simulation on your machine (using either the [2D](simulationsandbox/environments/lake_env.py) or [3D](simulationsandbox/environments/aquarium.py) example envs provided):
 
 ```bash
-python3 simulate.py  
+python3 run_simulation.py  
 ```
 
 You can also easiely implement your own environment and add it to the [environments directory](simulationsandbox/environments/). 
 
+### Run a simulation on a server
+
 Or host it on a server :
 
 ```bash
-python3 server.py
+python3 run_server.py
 ```
+
+### Visualize it on a distant client 
 
 Visualize it on distant clients : 
 
 ```bash
-python3 client.py
+python3 run_client.py
 ```
+
+### Interact with it in real time with a notebook 
 
 Modify the state of the simulation in real time : use [this notebook client](notebook_controller.ipynb)
 

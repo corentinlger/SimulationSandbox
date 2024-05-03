@@ -164,7 +164,6 @@ class Aquarium(BaseEnv):
 
         objects = state.objects.replace(pos=food_pos, exist=food_exist)
         agents = state.agents.replace(pos=agents_pos, velocity=velocity, energy=agents_energy)
-        jax.debug.print("energy {x}", x=agents_energy)
 
         # Update new state
         time = state.time + 1
@@ -208,7 +207,7 @@ class Aquarium(BaseEnv):
         SCALE = 15
         # TODO : see how to add cmap=colormaps["gist_rainbow"] for fish colors
         ax.scatter(agents_x_pos, agents_y_pos, agents_z_pos, c=agents_colors, s=(1 +agents_energy)*SCALE, marker="o", label="Fish")
-        ax.scatter(objects_x_pos, objects_y_pos, objects_z_pos, c=objects_colors, marker="o", label="Fish")
+        ax.scatter(objects_x_pos, objects_y_pos, objects_z_pos, c=objects_colors, marker="o", label="Food")
 
         ax.set_title("Multi-Agent Simulation")
         ax.set_xlabel("X-axis")
