@@ -1,5 +1,3 @@
-# TODO : Add more elements to the environment
-
 from functools import partial
 
 import jax.numpy as jnp
@@ -74,7 +72,8 @@ class LakeEnv(BaseEnv):
         self.max_agents = max_agents
         self.grid_size = grid_size
 
-    def init_state(self, num_agents, num_obs, key):
+    def init_state(self, num_agents=5, num_obs=2, seed=0):
+        key = random.PRNGKey(seed)
         agents_key_pos, agents_key_theta, lake_key = random.split(key, 3)
 
         agents = Agents(

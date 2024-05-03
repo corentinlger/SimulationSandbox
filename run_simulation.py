@@ -14,21 +14,19 @@ def main():
     parser.add_argument("--num_obs", type=int, default=3)
     parser.add_argument("--grid_size", type=int, default=20)
     parser.add_argument("--step_delay", type=float, default=0.01)
-    parser.add_argument("--random_seed", type=int, default=0)
+    parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--visualize", action="store_false")
     args = parser.parse_args()  
 
-    key = random.PRNGKey(args.random_seed)
+    key = random.PRNGKey(args.seed)
 
     try:
         Env = ENVS[args.env]
     except:
         raise(ValueError(f"Unknown environment {args.env}"))
-    # sim = Simulation(args.max_agents, args.grid_size)
-    # state = sim.init_state(args.num_agents, args.num_obs, key)
 
-    env = Env()
-    state = env.init_state()
+    env = Env(max_agents=args.max_agents, grid_size=args.grid_size)
+    state = env.init_state(seed=args.seed)
 
     # Launch a simulation
     print("Simulation started")
