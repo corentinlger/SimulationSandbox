@@ -11,16 +11,13 @@ from simulationsandbox.utils.envs import ENVS
 
 logger = logging.getLogger(__name__)
 
-# TODO : remove SERVER when will remove old run_client and run_server files
 SERVER_IP = 'localhost'
-SERVER = 'localhost'
 
 class Server:
     def __init__(self, server_ip, port, env_name, max_agents, seed, step_delay, data_size):
         self.server_ip = server_ip
         self.port = port 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # TODO remove this line after
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.addr = (self.server_ip, self.port)
         self.server.bind(self.addr)
@@ -157,7 +154,6 @@ class Server:
                 break
 
     # Helper functions for Notebook clients
-
     def handle_close_connection(self, client, addr):
         """Close connection between the server and the client
 
@@ -220,22 +216,6 @@ class Server:
 
 
 class Client:
-    def __init__(self, addr, port):
-        self.addr = addr
-        self.port = port
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def connect(self):
-        self.client.connect((self.addr, self.port))
-
-    def send(self, data):
-        self.client.send(data)
-
-    def receive(self):
-        return self.client.recv(self.DATA_SIZE)
-    
-
-class ReceiveClient:
     def __init__(self, server_ip, port, data_size, eval_time):
         self.server_ip = server_ip
         self.port = port
@@ -245,23 +225,35 @@ class ReceiveClient:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.state_example = None
         self.state_bytes_size = None
+        self.client_type = None
         self.env = None
 
     def connect(self):
-        self.client.connect(self.addr)
-        logger.info(f"Connected to {(self.addr, self.port)}")
-        self.env_name = self.client.recv(1024).decode()
-        logger.info(f"Received {self.env_name} env name")
+        """Connect with a remote server and send its client type
+        """
+        try:
+            self.client.connect(self.addr)
+            logger.info(f"Connected to {(self.addr, self.port)}")
+            self.env_name = self.client.recv(1024).decode()
+            logger.info(f"Received {self.env_name} env name")
 
-        self.state_example = pickle.loads(self.client.recv(self.data_size))
-        self.state_bytes_size = len(serialization.to_bytes(self.state_example))
+            self.state_example = pickle.loads(self.client.recv(self.data_size))
+            self.state_bytes_size = len(serialization.to_bytes(self.state_example))
 
-        self.response = "RECEIVE"
-        self.client.send(self.response.encode())
-        self.Env = ENVS[self.env_name]
-        time.sleep(1)
+            self.client.send(self.client_type.encode())
+            self.Env = ENVS[self.env_name]
+            time.sleep(1)
+        except socket.error as e:
+                logger.error(f"error: {e}")
+
+class ReceiveClient(Client):
+    def __init__(self, server_ip, port, data_size, eval_time):
+        super().__init__(server_ip, port, data_size, eval_time)
+        self.client_type = "RECEIVE"
 
     def receive_loop(self):
+        """Start a loop where the client continuously receives and plots new states of the simulation server
+        """
         i = 0
         while True:
             try:
@@ -275,6 +267,8 @@ class ReceiveClient:
                 break
 
     def test(self):
+        """Test how many states are received per seconds form the server
+        """
         start = time.time()
         i = 0
         while time.time() < start + self.eval_time:
@@ -285,3 +279,42 @@ class ReceiveClient:
         self.client.close()
         logger.info(f"{i=} : {i / self.eval_time} data received per second")
 
+
+class NotebookClient(Client):
+    def __init__(self, server_ip, port, data_size, eval_time):
+        super().__init__(server_ip, port, data_size, eval_time)
+        self.client_type = "NOTEBOOK"
+
+    def get_state(self):
+        """Get the current state of the server's simulation 
+
+        :return: state
+        """
+        self.client.send("GET_STATE".encode())
+        raw_data = self.client.recv(self.state_bytes_size)
+        return serialization.from_bytes(self.state_example, raw_data)
+
+    def pause(self):
+        """Send a request to pause the server's simulation 
+        """
+        self.client.send("PAUSE".encode())
+
+    def resume(self):
+        """Send a request to resume the server's simulation 
+        """
+        self.client.send("RESUME".encode())
+
+    def stop(self):
+        """Send a request to stop the server's simulation 
+        """
+        self.client.send("STOP".encode())
+
+    def start(self):
+        """Send a request to start the server's simulation 
+        """
+        self.client.send("START".encode())
+
+    def close(self):
+        """Send a request to close the server's simulation 
+        """
+        self.client.send("CLOSE_CONNECTION".encode())
