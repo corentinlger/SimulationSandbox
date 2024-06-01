@@ -202,9 +202,6 @@ class Aquarium(BaseEnv):
     def drop_food(self, state, non_ex_food_idx, key):
         # Get the idx of the new food that will become existing
         idx_key, pos_key = random.split(key)
-        jax.debug.print("idx_key {x}", x=idx_key)
-        print(idx_key)
-        jax.debug.print("non_ex_food_idx {x}", x=non_ex_food_idx)
         idx = jax.random.choice(idx_key, non_ex_food_idx, shape=(self.n_dropped_food,), replace=False)
         # Assign new positions and existing values to the food objects at these idx
         food_exists = state.objects.exist.at[idx].set(1.)
