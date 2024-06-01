@@ -4,7 +4,6 @@ import time
 from jax import random
 
 class SimulationWrapper:
-
     def __init__(self, env, state, seed, step_delay=0.1, update_event=None, sim_lock=None, print_data=False):
         self.running = False
         self.paused = False
@@ -19,6 +18,8 @@ class SimulationWrapper:
         self.key = random.PRNGKey(seed)
         
     def start(self):
+        """Start the simulation
+        """
         if not self.running:
             self.running = True
             self.stop_requested = False
@@ -26,15 +27,23 @@ class SimulationWrapper:
             self.update_thread.start()
 
     def pause(self):
+        """Pause the simulation
+        """
         self.paused = True
 
     def resume(self):
+        """Resume the simulation
+        """
         self.paused = False
 
     def stop(self):
+        """Stop the simulation
+        """
         self.stop_requested = True
 
     def simulation_loop(self):
+        """Start a simulation loop that updates the simulation state at regular intervals, unless the simulation is paused
+        """
         while not self.stop_requested:
             if self.paused:
                 time.sleep(0.1)
@@ -46,11 +55,14 @@ class SimulationWrapper:
                 self.update_event.set()
 
             if self.print_data:
-                # print(f"{self.state = }")
                 print("stepped")
 
             time.sleep(self.step_delay) 
 
     def _update_env_state(self):
+        """Update the environment state
+
+        :return: new state 
+        """
         self.key, key = random.split(self.key)
         return self.env.step(self.state, key)
