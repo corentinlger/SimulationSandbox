@@ -52,14 +52,31 @@ class AquiariumState(BaseEnvState):
 # TODO : see if we don't just add all the functions in the class instead of some here and some below
 # Helper functions
 def normal(theta):
+    """Compute cos and sin of an angle
+
+    :param theta: angle
+    :return: cos and sin
+    """
     return jnp.array([jnp.cos(theta), jnp.sin(theta)])
 
 normal = jit(vmap(normal))
 
 def multiply_masks(mask1, mask2):
+    """Multiply two masks of 0s and 1s
+
+    :param mask1: mask1
+    :param mask2: mask2
+    :return: final mask
+    """
     return mask1 * mask2
 
 def distance(point1, point2):
+    """Compute the distance between two points
+
+    :param point1: coordinates of point 1
+    :param point2: coordinates of point 2
+    :return: distance
+    """
     diff = point1 - point2
     squared_diff = jnp.sum(jnp.square(diff))
     return jnp.sqrt(squared_diff)
@@ -68,12 +85,23 @@ distance = jit(vmap(distance, in_axes=(None, 0)))
 
 # Change the angle and speed of the agent a bit 
 def move(obs, key):
+    """(Randomly) Change the velocity vector of agents to make them move
+
+    :param obs: agent observation (unused at the moment)
+    :param key: jax PRNGKey
+    :return: new velocity vector
+    """
     return random.normal(key, shape=(3,)) * MOVE_SCALE
 
 move = jit(vmap(move, in_axes=(0, 0)))
 
-# TODO : add small documentations and comments to the lines
 def eat(agent_idx, state):
+    """Make the agent eat food around itself
+
+    :param agent_idx: idx of the agent in the state
+    :param state: current state
+    :return: updated food_exist mask, number of eaten food
+    """
     agent_pos = state.agents.pos[agent_idx]
     alive = state.agents.alive[agent_idx]
 
@@ -90,7 +118,9 @@ def eat(agent_idx, state):
     updated_food_exist = food_exist * mask
 
     # Return the old mask if the agent isn't alive
-    return jnp.where(alive, updated_food_exist, food_exist),  jnp.where(alive, n_eaten, 0)
+    food_exist = jnp.where(alive, updated_food_exist, food_exist)
+    n_eaten = jnp.where(alive, n_eaten, 0)
+    return food_exist, n_eaten 
 
 eat = vmap(eat, in_axes=(0, None))
 
@@ -101,9 +131,9 @@ class Aquarium(BaseEnv):
         self.max_agents = max_agents
         self.max_objects = max_objects  
         self.grid_size = grid_size
-        # recharge food when only 10% of max food in the aquarium
+        # Drop food when only 10% of max food remaining in the aquarium
         self.drop_food_threshold = self.max_objects // 10 
-        # Add back half of the max food in the aquarium when recharching it
+        # Add back half of the max food in the aquarium when condition above is met
         self.n_dropped_food = self.max_objects // 2 
 
     def init_state(self, num_agents=None, num_obs=2, seed=0):
@@ -150,6 +180,12 @@ class Aquarium(BaseEnv):
     # TODO : split the code into different functions to make it more digestible
     @partial(jit, static_argnums=(0,))
     def _step(self, state, key):
+        """Make a jitted step in the environment
+
+        :param state: old state
+        :param key: jax PRNGKey
+        :return: new state
+        """
         # Drop new food if there is not enough in the aquarium, else keep the same state 
         key, drop_food_key = random.split(key)
         drop_food = jnp.sum(state.objects.exist) < self.drop_food_threshold 
@@ -192,12 +228,25 @@ class Aquarium(BaseEnv):
         return state
     
     def step(self, state, key):
+        """Make a step in the environment by calling _step
+
+        :param state: old_state
+        :param key: jax PRNGKey
+        :return: new state
+        """
         # At the moment only call the _step but could add new methods in the future
         state = self._step(state, key)
         return state
     
     # function to modify the state in the lax.cond for food dropping
     def drop_food(self, state, non_ex_food_idx, key):
+        """Place unexisting food at the top of the aquarium to make it drop
+
+        :param state: current state
+        :param non_ex_food_idx: mask of non existing food
+        :param key: jax PRNGKey
+        :return: updated state with new food placed at the top of the water
+        """
         # Get the idx of the new food that will become existing
         idx_key, pos_key = random.split(key)
         idx = random.choice(idx_key, a=jnp.arange(len(non_ex_food_idx)), p=non_ex_food_idx, shape=(self.n_dropped_food,), replace=False)
@@ -210,21 +259,45 @@ class Aquarium(BaseEnv):
     
     # function to keep the state as it is in the lax.cond for food dropping
     def dont_change(self, state, non_ex_food_idx, key):
+        """Keep the state intact
+
+        :param state: current state
+        :param non_ex_food_idx: mask of non existing food
+        :param key: jax PRNGKey
+        :return: unmodified state
+        """
         return state
 
     def place_food_at_surface(self, n_food, key):
+        """Place n_food at the surface of the aquarium
+
+        :param n_food: number of food particles
+        :param key: _description_jax PRNGKey
+        :return: food position
+        """
         x_y_food_pos=random.uniform(key=key, shape=(n_food, 2), minval=0, maxval=self.grid_size) 
         z_food_pos = jnp.full((n_food, 1), fill_value=self.grid_size)
         food_pos = jnp.concatenate((x_y_food_pos, z_food_pos), axis=1)
         return food_pos
 
-    # TODO : Check these unused functions
     def add_agent(self, state, agent_idx):
+        """Add an agent at idx agent_idx
+
+        :param state: state
+        :param agent_idx: agent_idx
+        :return: state with agent agent_idx alive
+        """
         agents = state.agents.replace(alive=state.agents.alive.at[agent_idx].set(1.0))
         state = state.replace(agents=agents)
         return state
     
     def remove_agent(self, state, agent_idx):
+        """Remove an agent at idx agent_idx
+
+        :param state: state
+        :param agent_idx: agent_idx
+        :return: state with agent agent_idx dead
+        """
         agents = state.agents.replace(alive=state.agents.alive.at[agent_idx].set(0.0))
         state = state.replace(agents=agents)
         return state
@@ -232,6 +305,10 @@ class Aquarium(BaseEnv):
     # TODO : See how to potentially render the env with PIL / VideoWriter like in other jax libs
     @staticmethod
     def render(state):
+        """Render the current state 
+
+        :param state: state
+        """
         if not plt.fignum_exists(1):
             plt.ion()
             fig = plt.figure(figsize=(10, 10))
