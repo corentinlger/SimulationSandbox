@@ -1,6 +1,6 @@
 # SimulationSandbox
 
-Minimalistic simulation environment implemented in Jax with simple server-client interaction. Enables modifying the simulation state in real time from notebook controllers, and plotting the state on distant clients. 
+SimulationSandbox is a simple framework built with Jax and Socket that allows for real-time interaction between a simulation hosted on a server and multiple clients. It provides a simple interface fmodifying or plotting the state of a hosted simulation from remote clients such as jupyter notebooks. 
 
 ## Install 
 
@@ -65,7 +65,5 @@ And add your own features to the [tests directory](tests/)
 
 ## TODO : 
 
-- Add a networking class for client-server interaction
-- Stop the atrocious popping up of matplotlib interactive figures 
-- Replace sending the first example state with pickle by generating it on the client side 
-- Further check the interaction between 3D sim and notebook client 
+- Stop the popping up of matplotlib interactive figures 
+- Replace the mechanism to send the first example state to the client (currently using pickle)
