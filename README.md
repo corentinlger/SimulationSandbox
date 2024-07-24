@@ -1,6 +1,6 @@
 # SimulationSandbox
 
-SimulationSandbox is a simple framework built with Jax and Socket that allows for real-time interaction between a simulation hosted on a server and multiple clients. It provides a simple interface fmodifying or plotting the state of a hosted simulation from remote clients such as jupyter notebooks. 
+SimulationSandbox is a simple framework built with Jax and Socket that allows for real-time interaction between a simulation hosted on a server and multiple clients. It provides a simple interface for modifying or plotting the state of a hosted simulation from remote clients, such as jupyter notebooks. 
 
 ## Install 
 
