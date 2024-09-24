@@ -68,7 +68,7 @@ is_point_in_lake = jit(vmap(is_point_in_lake, in_axes=(0, None)))
 
 class LakeEnv(BaseEnv):
     """ Minimalistic environmnent with a lake in the middle """
-    def __init__(self, max_agents, grid_size):
+    def __init__(self, max_agents, grid_size=50):
         self.max_agents = max_agents
         self.grid_size = grid_size
 

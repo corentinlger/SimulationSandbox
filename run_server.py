@@ -12,7 +12,7 @@ SEED = 0
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--env_name', type=str, default="aquarium")
+    parser.add_argument('--env', type=str, default="aquarium")
     parser.add_argument('--step_delay', type=float, default=0.1)
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--print_data', action="store_true")
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     server = Server(
         server_ip=SERVER_IP,
         port=PORT,
-        env_name=args.env_name,
+        env_name=args.env,
         max_agents=MAX_AGENTS,
         seed=SEED,
         step_delay=args.step_delay,

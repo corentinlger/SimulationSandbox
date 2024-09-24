@@ -131,10 +131,10 @@ class Aquarium(BaseEnv):
         self.max_agents = max_agents
         self.max_objects = max_objects  
         self.grid_size = grid_size
-        # Drop food when only 10% of max food remaining in the aquarium
-        self.drop_food_threshold = self.max_objects // 10 
-        # Add back half of the max food in the aquarium when condition above is met
-        self.n_dropped_food = self.max_objects // 2 
+        # Drop food when only ~30% of max food remaining in the aquarium
+        self.drop_food_threshold = self.max_objects // 3 
+        # Add back ~30% of the max food in the aquarium when condition above is met
+        self.n_dropped_food = self.max_objects // 3
 
     def init_state(self, num_agents=None, num_obs=2, seed=0):
         num_agents = num_agents if num_agents else self.max_agents
